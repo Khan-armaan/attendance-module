@@ -1,0 +1,11 @@
+
+{
+  "staff": {
+    "name": "John",
+    "staff_Id": "737",
+    "position": "Tester",
+    "joining_date": "2023-01-01",
+    "phone_number": "1234567890",
+    "address": "Bhimtal"
+  }
+}
