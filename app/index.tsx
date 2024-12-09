@@ -6,7 +6,8 @@ import { SubmitHandler, useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 
 const schema = z.object({
-  number: z.string().length(10, "Phone number must be exactly 10 digits")
+  number: z.string().length(10, "Phone number must be exactly 10 digits"),
+  password: z.string().min(6, "Password must be at least 6 characters")
 });
 
 type FormFields = z.infer<typeof schema>;
@@ -20,6 +21,7 @@ export default function Login() {
   } = useForm<FormFields>({
     defaultValues: {
       number: "",
+      password: "",
     },
     resolver: zodResolver(schema),
   });
@@ -29,7 +31,7 @@ export default function Login() {
       const phoneNumber = data.number;
       console.log('Phone number:', phoneNumber);
       
-      router.replace('/verifyCode');
+      router.replace('/mark-attendance');
     } catch (error) {
       setError("root", {
         message: "error in the server",                        
@@ -71,6 +73,25 @@ export default function Login() {
           />
           {errors.number && (
             <Text className="text-red-500 text-sm ml-1">{errors.number.message}</Text>
+          )}
+        </View>
+        <View className="w-full space-y-2">
+          <Text className="text-gray-700 text-sm font-medium ml-1 mt-7">Password</Text>
+          <Controller
+            control={control}
+            name="password"
+            render={({ field: { onChange, value } }) => (
+              <TextInput
+                value={value}
+                onChangeText={onChange}
+                placeholder="Enter password"
+                secureTextEntry={true}
+                className="border border-gray-300 p-4 rounded-xl w-full bg-gray-50 mt-3"
+              />
+            )}
+          />
+          {errors.password && (
+            <Text className="text-red-500 text-sm ml-1">{errors.password.message}</Text>
           )}
         </View>
 

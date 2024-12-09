@@ -39,6 +39,7 @@ export default function AttendanceCalendar() {
       const response = await axios.get<AttendanceResponse>(
         `https://api-stage.feelaxo.com/api/attendance/staff/${staffData.staffId}?date=${formattedDate}`
       );
+     
       setAttendanceData(response.data);
     } catch (error) {
       console.error('Error fetching attendance:', error);

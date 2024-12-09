@@ -26,43 +26,23 @@ export default function MarkAttendance() {
 
     useEffect(() => {
         let locationInterval: NodeJS.Timeout | null = null;
-        let previousLocation: Location.LocationObject | null = null;
           
         async function getCurrentLocation() {
-          console.log('Getting current location...');
-          
-          let { status } = await Location.requestForegroundPermissionsAsync();
-          if (status !== 'granted') {
-            console.log('Location permission denied');
-            setErrorMsg('Permission to access location was denied');
-            return;
-          }
-          
-          let location = await Location.getCurrentPositionAsync({});
-          console.log('New location:', {
-            latitude: location.coords.latitude,
-            longitude: location.coords.longitude
-          });
-          setLocation(location);
-
-         // if previous location is not null  
-          if (previousLocation) {
-            const prevLat = previousLocation.coords.latitude;
-            const prevLong = previousLocation.coords.longitude;
-            const newLat = location.coords.latitude;
-            const newLong = location.coords.longitude;
-
-            console.log('Location comparison:', {
-              previous: { lat: prevLat, long: prevLong },
-              new: { lat: newLat, long: newLong }
-            });
-                // if previous latittude or longitude is not equal to the new coords trigger again the check in 
-            if (prevLat !== newLat || prevLong !== newLong) {
-                console.log('Location changed, triggering checkIn');
-                checkIn();
+            console.log('Getting current location...');
+            
+            let { status } = await Location.requestForegroundPermissionsAsync();
+            if (status !== 'granted') {
+                console.log('Location permission denied');
+                setErrorMsg('Permission to access location was denied');
+                return;
             }
-          }
-          previousLocation = location; // set the previous location to the new location 
+            
+            let location = await Location.getCurrentPositionAsync({});
+            console.log('New location:', {
+                latitude: location.coords.latitude,
+                longitude: location.coords.longitude
+            });
+            setLocation(location);
         }
 
         if (isTracking) {
@@ -70,9 +50,8 @@ export default function MarkAttendance() {
             locationInterval = setInterval(() => {
                 getCurrentLocation();
                 ++numberOfRequest;
-            }, 1000 * 60* 10);
+            }, 1000 * 60 * 10);
         }
-
 
         return () => {
             if (locationInterval) clearInterval(locationInterval);
@@ -145,7 +124,7 @@ export default function MarkAttendance() {
                 staff_id: staffData.staffId,
                 lat: lat,
                 long: long,
-                status: "in"
+                status: "in" // have to remove status
             });
             console.log('CheckIn response:', response.data);
             const now = new Date().toLocaleTimeString('en-US', {
