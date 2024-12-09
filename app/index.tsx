@@ -98,7 +98,7 @@ export default function Login() {
         <TouchableOpacity
           onPress={handleSubmit(onSubmit)}
           disabled={isSubmitting}
-          className="bg-[#1877F2] py-3 rounded-full w-full mt-3 shadow-lg"
+          className="bg-[#1877F2] py-3 rounded-full w-full  shadow-lg mt-10"
         >
           {isSubmitting ? (
             <ActivityIndicator color="#FFFFFF" />

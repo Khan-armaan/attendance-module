@@ -19,6 +19,8 @@ interface AttendanceResponse {
   }>;
 }
 
+
+
 export default function AttendanceCalendar() {
 
   // state variables  
@@ -63,7 +65,6 @@ export default function AttendanceCalendar() {
       setIsLoading(true);
       const today = new Date();
       const formattedDate = `${today.getDate().toString().padStart(2, '0')}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getFullYear()}`;
-      console.log(formattedDate)
       const response = await axios.get<AttendanceResponse>(
         `https://api-stage.feelaxo.com/api/attendance/staff/${staffData.staffId}/range?date=${formattedDate}`
       );
@@ -74,9 +75,9 @@ export default function AttendanceCalendar() {
         const lastStatus = Object.values(record.time).pop();
         
         marks[date] = {
-          marked: true,
-          dotColor: lastStatus === 'in' ? '#4ade80' : '#ef4444',
-          selectedColor: '#2563eb'
+          selected: true,
+          selectedColor: lastStatus === 'in' ? '#4ade80' : '#ef4444',
+          disableTouchEvent: false
         };
       });
       
@@ -116,8 +117,6 @@ export default function AttendanceCalendar() {
             dayTextColor: '#2d3748',
             textDisabledColor: '#9ca3af',
             monthTextColor: '#1f2937',
-            dotColor: '#ef4444',
-            selectedDotColor: '#ffffff',
             textMonthFontSize: 18,
             textMonthFontWeight: 'bold',
             textDayFontSize: 16,
@@ -145,24 +144,31 @@ export default function AttendanceCalendar() {
             ) : (
               <>
                 <Text className="text-lg font-semibold mb-4">
-                  Attendance for {selectedDate}
+                  Attendance Details - {selectedDate}
                 </Text>
-                {attendanceData?.staff && (
-                  <View className="mb-4">
-                    <Text className="font-medium">Staff: {attendanceData.staff.staff_name}</Text>
-                    <Text>Status: {attendanceData.staff.status}</Text>
-                  </View>
-                )}
                 {attendanceData?.attendance.length ? (
-                  attendanceData.attendance.map((entry, index) => (
-                    <View key={index} className="border-t border-gray-200 pt-2">
-                      {Object.entries(entry.time).map(([time, status]) => (
-                        <Text key={time}>
-                          {time}: {status}
-                        </Text>
-                      ))}
+                  <View>
+                    <View className="bg-green-100 p-3 rounded-md mb-2">
+                      <Text className="font-semibold">TIME IN</Text>
+                      <Text>
+                        {Object.keys(attendanceData.attendance[0].time)[0]}
+                      </Text>
                     </View>
-                  ))
+                    
+                    <View className="bg-red-100 p-3 rounded-md mb-2">
+                      <Text className="font-semibold">OUT OF OFFICE</Text>
+                      <Text>
+                        {Object.entries(attendanceData.attendance[0].time)
+                          .filter(([_, status]) => status === 'out')
+                          .slice(-1)[0]?.[0] || 'Still Working'}
+                      </Text>
+                    </View>
+                    
+                    <View className="bg-blue-100 p-3 rounded-md">
+                      <Text className="font-semibold">DURATION</Text>
+                      <Text></Text>
+                    </View>
+                  </View>
                 ) : (
                   <Text className="text-gray-500">No attendance records found</Text>
                 )}
