@@ -4,8 +4,12 @@ import { router } from 'expo-router';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SubmitHandler, useForm, Controller } from "react-hook-form";
 import { z } from "zod";
+import axios from "axios";
+import { useState } from "react";
+import  UserData  from "../types";
+import { useUser } from '../contexts/UserContext';
 
-const schema = z.object({
+export  const  schema = z.object({
   number: z.string().length(10, "Phone number must be exactly 10 digits"),
   password: z.string().min(6, "Password must be at least 6 characters")
 });
@@ -13,6 +17,7 @@ const schema = z.object({
 type FormFields = z.infer<typeof schema>;
 
 export default function Login() {
+  const { setUserData } = useUser();
   const {
     control,
     handleSubmit,
@@ -28,13 +33,19 @@ export default function Login() {
 
   const onSubmit: SubmitHandler<FormFields> = async (data) => {
     try {
-      const phoneNumber = data.number;
-      console.log('Phone number:', phoneNumber);
+      const response = await axios.post('https://api-stage.feelaxo.com/api/staff/login', {
+        phone: data.number,
+        password: data.password
+      });
       
-      router.replace('/mark-attendance');
+      setUserData(response.data);
+      
+      if (response.data?.id) {
+        router.push('/mark-attendance');
+      }
     } catch (error) {
       setError("root", {
-        message: "error in the server",                        
+        message: "Invalid phone number or password",                        
       });        
     }
   };

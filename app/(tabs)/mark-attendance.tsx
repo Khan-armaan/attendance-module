@@ -5,9 +5,7 @@ import staffData from '../../data/staffData.json';
 import axios from "axios"
 import * as Location from 'expo-location';
 import Toast from 'react-native-toast-message';
-
-
-
+import { useUser } from '../../contexts/UserContext';
 
 export default function MarkAttendance() {
     // states variables 
@@ -20,7 +18,9 @@ export default function MarkAttendance() {
     const [checkedIn, setCheckedIn] = useState(false)
     const [checkedOut, setCheckedOut] = useState(false)
     
-    let numberOfRequest = 0     // global variable for the number of request sent 
+    const { userData } = useUser();
+    
+    let numberOfRequest = 0          // global variable for the number of request sent 
     
 
 
@@ -45,18 +45,21 @@ export default function MarkAttendance() {
             setLocation(location);
         }
 
+        // Initial location fetch
+        getCurrentLocation();
+
         if (isTracking) {
             // Start location tracking
             locationInterval = setInterval(() => {
                 getCurrentLocation();
-                ++numberOfRequest;
             }, 1000 * 60 * 10);
+             // Every 10 minutes
         }
 
         return () => {
             if (locationInterval) clearInterval(locationInterval);
         };
-    }, [isTracking]);
+    }, [isTracking]); // Add isTracking to dependency array
       let text = 'Waiting...';  // this all code is there since the location can be empty  
       let long = 0;
       let lat = 0;
@@ -97,6 +100,7 @@ export default function MarkAttendance() {
 
 
 
+
     //created a function to check in
    async function checkIn(){
         // Prevent multiple check-ins
@@ -111,22 +115,15 @@ export default function MarkAttendance() {
             return;
         }
 
-        setIsTracking(true);
-        console.log('CheckIn initiated with:', {
-            staff_id: staffData.staffId,
-            lat: lat,
-            long: long,
-            status: "in"
-        });
-    
         try {
             const response = await axios.put('https://api-stage.feelaxo.com/api/attendance/status', {
-                staff_id: staffData.staffId,
+                staff_id: userData?.id,
                 lat: lat,
                 long: long,
-                status: "in" // have to remove status
+                status: "in"
             });
-            console.log('CheckIn response:', response.data);
+
+            setIsTracking(true);
             const now = new Date().toLocaleTimeString('en-US', {
                 hour: '2-digit',
                 minute: '2-digit',
@@ -134,8 +131,9 @@ export default function MarkAttendance() {
                 hour12: false
             });
             setCheckInTime(now);
-            setCheckedIn(true)
-            
+            setCheckedIn(true);
+
+           
             Toast.show({
                 type: 'success',
                 text1: 'Check In',
@@ -144,16 +142,17 @@ export default function MarkAttendance() {
                 visibilityTime: 3000,
             });
         } catch (error: any) {
-            console.log('CheckIn error:', error.response?.data || error.message);
+            console.error('CheckIn error:', error.response?.data || error.message);
             Toast.show({
                 type: 'error',
                 text1: 'Error',
                 text2: error.response?.data?.message || 'Error checking in',
-                position: 'top', 
+                position: 'top',
                 visibilityTime: 3000,
             });
         }
    }
+
 
 
 
@@ -172,14 +171,18 @@ export default function MarkAttendance() {
         }
 
         try {
-            const response = await axios.put('https://api-stage.feelaxo.com/api/attendance/status',{
-                staff_id: staffData.staffId,
+            const response = await axios.put('https://api-stage.feelaxo.com/api/attendance/status', {
+                staff_id: userData?.id,
                 lat: lat,
                 long: long,
                 status: "out"
-            })
+            });
+            
             setIsTracking(false);
-            setCheckedOut(true); // Set checkout status
+            setCheckedOut(true);
+
+           
+
             Toast.show({
                 type: 'success',
                 text1: 'Check Out',
@@ -206,30 +209,30 @@ export default function MarkAttendance() {
                    
                     <View className="items-center mb-8">
                        
-                        <Text className="text-2xl font-bold mt-4">{staffData.name}</Text>
+                        <Text className="text-2xl font-bold mt-4">{userData?.name}</Text>
                     </View>
 
                     
                     <View className="space-y-4">
                         <View className="flex-row items-center mb-3">
                             <Icon name="id-badge" size={20} color="#666" />
-                            <Text className="text-gray-600 ml-3">Staff ID: {staffData.staffId}</Text>
+                            <Text className="text-gray-600 ml-3">Staff ID: {userData?.id}</Text>
                         </View>
                         <View className="flex-row items-center mb-3">
                             <Icon name="briefcase" size={20} color="#666" />
-                            <Text className="text-gray-600 ml-3">Position: {staffData.position}</Text>
+                            <Text className="text-gray-600 ml-3">Position: {userData?.job_title}</Text>
                         </View>
                         <View className="flex-row items-center mb-3">
                             <Icon name="calendar" size={20} color="#666" />
-                            <Text className="text-gray-600 ml-3">Joining Date: {staffData.joiningDate}</Text>
+                            <Text className="text-gray-600 ml-3">Joining Date: {userData?.joining_date}</Text>
                         </View>
                         <View className="flex-row items-center mb-3">
                             <Icon name="phone" size={20} color="#666" />
-                            <Text className="text-gray-600 ml-3">Phone: {staffData.phone}</Text>
+                            <Text className="text-gray-600 ml-3">Phone: {userData?.phone}</Text>
                         </View>
                         <View className="flex-row items-center mb-3">
                             <Icon name="map-marker" size={20} color="#666" />
-                            <Text className="text-gray-600 ml-3">Address: {staffData.address}</Text>
+                            <Text className="text-gray-600 ml-3">Address: {userData?.address}</Text>
                         </View>
                         <View className="flex-row items-center mb-3">
                             <Icon name="calendar-o" size={20} color="#666" />
@@ -248,7 +251,7 @@ export default function MarkAttendance() {
 
                         {checkedIn ? (
                             <TouchableOpacity 
-                                className="bg-green-400 py-4 rounded-xl mb-4"
+                                className="bg-gray-700 py-4 rounded-xl mb-4"
                                 disabled={true}
                             >
                                 <Text className="text-white text-center font-semibold">Check in time {checkInTime}</Text>
@@ -264,14 +267,14 @@ export default function MarkAttendance() {
 
                         {checkedIn && !checkedOut ? (
                             <TouchableOpacity 
-                                className="bg-gray-400 py-3 rounded-xl"
+                                className="bg-gray-700 py-3 rounded-xl"
                                 onPress={checkOut}
                             >
                                 <Text className="text-white text-center font-semibold">Check Out</Text>
                             </TouchableOpacity>
                         ) : checkedIn && checkedOut ? (
                             <TouchableOpacity 
-                                className="bg-green-400 py-3 rounded-xl"
+                                className="bg-gray-700 py-3 rounded-xl"
                                 disabled={true}
                             >
                                 <Text className="text-white text-center font-semibold">Checked Out</Text>

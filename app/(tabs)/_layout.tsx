@@ -1,12 +1,13 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { Link, Tabs } from 'expo-router';
+import { Link, router, Tabs } from 'expo-router';
 import { View, Image, TouchableOpacity, Modal, TouchableWithoutFeedback, Text } from 'react-native';
 import { useState } from 'react';
+import { useUser } from '../../contexts/UserContext';
 //if using the Tabs from the ex
 
 export default function TabLayout() {
   const [showMenu, setShowMenu] = useState(false);
-
+  const { userData } = useUser();
   return (
     <View className="flex-1">
 
@@ -24,7 +25,16 @@ export default function TabLayout() {
         <View>
           <TouchableOpacity onPress={() => setShowMenu(!showMenu)}>
             <View className="w-10 h-10 rounded-full bg-gray-200 justify-center items-center">
-              <FontAwesome name="user" size={24} color="gray" />
+            {userData?.profile ? (
+                                <Image 
+                                    source={{uri: userData.profile}}
+                                          className="w-6 h-6"
+                                    style={{ resizeMode: 'contain' }}
+                                 />
+                                  ) : (
+                                        <FontAwesome name="user" size={24} color="gray" />
+                                            )}
+             
             </View>
           </TouchableOpacity>
 
@@ -33,12 +43,12 @@ export default function TabLayout() {
               <TouchableOpacity 
                 className="flex-row items-center px-4 py-2 hover:bg-gray-100"
                 onPress={() => {
-                  /* Add navigation to settings */
+                  router.replace('/profile')
                   setShowMenu(false);
                 }}
               >
                 <FontAwesome name="cog" size={16} color="gray" className="mr-2" />
-                <Text className="ml-2">Settings</Text>
+                <Text className="ml-2">Profile</Text>
               </TouchableOpacity>
             </View>
           )}

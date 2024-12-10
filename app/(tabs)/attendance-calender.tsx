@@ -3,6 +3,9 @@ import { Calendar } from 'react-native-calendars';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import staffData from '../../data/staffData.json';
+import { useUser } from '../../contexts/UserContext';
+
+// there is the api issue for getting of the chech out time of the response 
 
 
 // type for attendance response
@@ -31,7 +34,7 @@ export default function AttendanceCalendar() {
   const [markedDates, setMarkedDates] = useState<Record<string, any>>({});
   const [isLoading, setIsLoading] = useState(false);
  
-
+  const { userData } = useUser();
 
   // function to fetch attendance for a specific date 
   const fetchAttendance = async (date: string) => {
@@ -39,7 +42,7 @@ export default function AttendanceCalendar() {
       setIsLoading(true);
       const formattedDate = date.split('-').reverse().join('-');
       const response = await axios.get<AttendanceResponse>(
-        `https://api-stage.feelaxo.com/api/attendance/staff/${staffData.staffId}?date=${formattedDate}`
+        `https://api-stage.feelaxo.com/api/attendance/staff/${userData?.id}?date=${formattedDate}`
       );
      
       setAttendanceData(response.data);
@@ -66,7 +69,7 @@ export default function AttendanceCalendar() {
       const today = new Date();
       const formattedDate = `${today.getDate().toString().padStart(2, '0')}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getFullYear()}`;
       const response = await axios.get<AttendanceResponse>(
-        `https://api-stage.feelaxo.com/api/attendance/staff/${staffData.staffId}/range?date=${formattedDate}`
+        `https://api-stage.feelaxo.com/api/attendance/staff/${userData?.id}/range?date=${formattedDate}`
       );
       
       const marks: Record<string, any> = {};
