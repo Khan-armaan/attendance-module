@@ -1,13 +1,34 @@
+import React from 'react';
 import { Text } from "react-native";
 import { View, TouchableOpacity, Image, ScrollView,  } from "react-native";
 import { Link, router, Stack } from 'expo-router';
 import { useUser } from '../contexts/UserContext';  // Adjust the import path as needed
 import { useState } from 'react';
 import { FontAwesome } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
+import { BackHandler } from 'react-native';
 
 export default function Profile() {
     const { userData } = useUser();
     const [showMenu, setShowMenu] = useState(false);
+
+    useFocusEffect(
+        React.useCallback(() => {
+            const onBackPress = () => {
+                router.replace('/mark-attendance');
+                return true; // Prevent default back action
+            };
+
+            // Add event listener for back action
+            const backHandler = BackHandler.addEventListener(
+                'hardwareBackPress',
+                onBackPress
+            );
+
+            // Clean up the event listener on unmount
+            return () => backHandler.remove();
+        }, [])
+    );
 
     return (
         <View className="flex-1 bg-gray-50">
