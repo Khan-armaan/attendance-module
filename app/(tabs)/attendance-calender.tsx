@@ -2,7 +2,6 @@ import { Text, View, Modal, TouchableOpacity, Pressable } from "react-native";
 import { Calendar } from 'react-native-calendars';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import staffData from '../../data/staffData.json';
 import { useUser } from '../../contexts/UserContext';
 
 // there is the api issue for getting of the chech out time of the response 
@@ -22,7 +21,32 @@ interface AttendanceResponse {
   }>;
 }
 
-
+// Add this utility function at the top of the file
+const calculateDuration = (checkIn: string, checkOut: string): string => {
+  if (!checkIn || !checkOut) return 'Still Working';
+  
+  try {
+    // Ensure the time strings are in "HH:mm" format
+    const [checkInHour, checkInMinute] = checkIn.split(':').map(Number);
+    const [checkOutHour, checkOutMinute] = checkOut.split(':').map(Number);
+    
+    if (isNaN(checkInHour) || isNaN(checkInMinute) || isNaN(checkOutHour) || isNaN(checkOutMinute)) {
+      return 'Invalid time format';
+    }
+    
+    const start = new Date(2000, 0, 1, checkInHour, checkInMinute);
+    const end = new Date(2000, 0, 1, checkOutHour, checkOutMinute);
+    
+    const diffMs = end.getTime() - start.getTime();
+    const hours = Math.floor(diffMs / (1000 * 60 * 60));
+    const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+    
+    return `${hours}h ${minutes}m`;
+  } catch (error) {
+    console.error('Duration calculation error:', error);
+    return 'Error calculating duration';
+  }
+};
 
 export default function AttendanceCalendar() {
 
@@ -169,7 +193,19 @@ export default function AttendanceCalendar() {
                     
                     <View className="bg-blue-100 p-3 rounded-md">
                       <Text className="font-semibold">DURATION</Text>
-                      <Text></Text>
+                      <Text>
+                        {attendanceData?.attendance.length ? (() => {
+                          const timeEntries = Object.entries(attendanceData.attendance[0].time);
+                          const checkInTime = timeEntries[0]?.[0];
+                          const checkOutEntry = timeEntries.filter(([_, status]) => status === 'out').pop();
+                          const checkOutTime = checkOutEntry?.[0];
+                          
+                          console.log('Check-in time:', checkInTime); // For debugging
+                          console.log('Check-out time:', checkOutTime); // For debugging
+                          
+                          return calculateDuration(checkInTime, checkOutTime || "");
+                        })() : '-'}
+                      </Text>
                     </View>
                   </View>
                 ) : (

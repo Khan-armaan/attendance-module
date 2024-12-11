@@ -5,35 +5,31 @@ import { Link, router, Stack } from 'expo-router';
 import { useUser } from '../contexts/UserContext';  // Adjust the import path as needed
 import { useState } from 'react';
 import { FontAwesome } from '@expo/vector-icons';
-import { useFocusEffect } from '@react-navigation/native';
 import { BackHandler } from 'react-native';
+import { useCallback } from 'react';
 
 export default function Profile() {
     const { userData } = useUser();
     const [showMenu, setShowMenu] = useState(false);
 
-    useFocusEffect(
-        React.useCallback(() => {
-            const onBackPress = () => {
-                router.replace('/mark-attendance');
-                return true; // Prevent default back action
-            };
+    React.useEffect(() => {
+        const onBackPress = () => {
+            router.replace('/mark-attendance');
+            return true;
+        };
 
-            // Add event listener for back action
-            const backHandler = BackHandler.addEventListener(
-                'hardwareBackPress',
-                onBackPress
-            );
+        const backHandler = BackHandler.addEventListener(
+            'hardwareBackPress',
+            onBackPress
+        );
 
-            // Clean up the event listener on unmount
-            return () => backHandler.remove();
-        }, [])
-    );
+        return () => backHandler.remove();
+    }, []);
 
     return (
         <View className="flex-1 bg-gray-50">
             {/**Navbar feelaxo icon  */}
-            <View className="h-20 flex-row justify-between items-center px-4 bg-white">
+            <View className="h-20 flex-row justify-between items-center px-6 bg-white">
                 <Link href="/">
                     <Image
                         source={require('../assets/images/icon.jpeg')}
@@ -75,9 +71,9 @@ export default function Profile() {
                 </View>
             </View>
 
-            <ScrollView className="flex-1">
+            <ScrollView className="flex-1 px-4">
                 {/* Profile Header Section */}
-                <View className="bg-white p-6 mb-4">
+                <View className="bg-white p-8 mb-6 rounded-lg">
                     <View className="items-center">
                         <Image 
                             source={{ uri: userData?.profile }} 
@@ -89,49 +85,49 @@ export default function Profile() {
                 </View>
 
                 {/* Contact Information */}
-                <View className="bg-white p-6 mb-4">
-                    <Text className="text-lg font-semibold mb-4">Contact Information</Text>
+                <View className="bg-blue-50 p-8 mb-6 rounded-lg border border-blue-100 shadow-sm">
+                    <Text className="text-lg font-semibold mb-4 text-blue-900">Contact Information</Text>
                     <View className="space-y-3">
                         <View className="flex-row items-center">
-                            <FontAwesome name="envelope" size={16} color="gray" />
-                            <Text className="ml-3 text-gray-600">{userData?.email}</Text>
+                            <FontAwesome name="envelope" size={16} color="#3B82F6" />
+                            <Text className="ml-3 text-gray-700">{userData?.email}</Text>
                         </View>
                         <View className="flex-row items-center">
-                            <FontAwesome name="phone" size={16} color="gray" />
-                            <Text className="ml-3 text-gray-600">{userData?.phone}</Text>
+                            <FontAwesome name="phone" size={16} color="#3B82F6" />
+                            <Text className="ml-3 text-gray-700">{userData?.phone}</Text>
                         </View>
                         <View className="flex-row items-center">
-                            <FontAwesome name="map-marker" size={16} color="gray" />
-                            <Text className="ml-3 text-gray-600">{userData?.address || 'Not specified'}</Text>
+                            <FontAwesome name="map-marker" size={16} color="#3B82F6" />
+                            <Text className="ml-3 text-gray-700">{userData?.address || 'Not specified'}</Text>
                         </View>
                     </View>
                 </View>
 
                 {/* Work Details */}
-                <View className="bg-white p-6 mb-4">
-                    <Text className="text-lg font-semibold mb-4">Work Information</Text>
+                <View className="bg-green-50 p-8 mb-6 rounded-lg border border-green-100 shadow-sm">
+                    <Text className="text-lg font-semibold mb-4 text-green-900">Work Information</Text>
                     <View className="space-y-3">
                         <View className="flex-row justify-between">
-                            <Text className="text-gray-600">Role</Text>
-                            <Text className="font-medium">{userData?.role}</Text>
+                            <Text className="text-gray-700">Role</Text>
+                            <Text className="font-medium text-green-800">{userData?.role}</Text>
                         </View>
                         <View className="flex-row justify-between">
-                            <Text className="text-gray-600">Working Hours</Text>
-                            <Text className="font-medium">{userData?.work_time_from} - {userData?.work_time_to}</Text>
+                            <Text className="text-gray-700">Working Hours</Text>
+                            <Text className="font-medium text-green-800">{userData?.work_time_from} - {userData?.work_time_to}</Text>
                         </View>
                         <View className="flex-row justify-between">
-                            <Text className="text-gray-600">Day Off</Text>
-                            <Text className="font-medium">{userData?.day_off}</Text>
+                            <Text className="text-gray-700">Day Off</Text>
+                            <Text className="font-medium text-green-800">{userData?.day_off}</Text>
                         </View>
                         <View className="flex-row justify-between">
-                            <Text className="text-gray-600">Joined</Text>
-                            <Text className="font-medium">
+                            <Text className="text-gray-700">Joined</Text>
+                            <Text className="font-medium text-green-800">
                                 {userData?.joining_date ? new Date(userData.joining_date).toLocaleDateString() : 'Not set'}
                             </Text>
                         </View>
                         <View className="flex-row justify-between">
-                            <Text className="text-gray-600">Commission</Text>
-                            <Text className="font-medium">{userData?.commission}%</Text>
+                            <Text className="text-gray-700">Commission</Text>
+                            <Text className="font-medium text-green-800">{userData?.commission}%</Text>
                         </View>
                     </View>
                 </View>
