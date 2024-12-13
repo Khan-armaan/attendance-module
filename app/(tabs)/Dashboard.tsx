@@ -1,4 +1,4 @@
-import { Text, View, ScrollView, ActivityIndicator } from "react-native";
+import { Text, View, ScrollView, ActivityIndicator, Modal, TouchableOpacity } from "react-native";
 import { useState, useEffect } from "react";
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useUser } from '../../contexts/UserContext';
@@ -27,6 +27,8 @@ interface Appointment {
 export default function Dashboard() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
   const { userData } = useUser();
   useEffect(() => {
     fetchAppointments();
@@ -52,6 +54,11 @@ export default function Dashboard() {
     return timeString.substring(0, 5);
   };
 
+  const handleAppointmentPress = (appointment: Appointment) => {
+    setSelectedAppointment(appointment);
+    setModalVisible(true);
+  };
+
   if (loading) {
     return (
       <View className="flex-1 justify-center items-center">
@@ -61,79 +68,118 @@ export default function Dashboard() {
   }
 
   return (
-    <ScrollView className="flex-1 bg-gray-50 px-4 py-6">
-      <View className="mb-6">
-        <Text className="text-2xl font-bold text-gray-800">Today's Appointments</Text>
-      </View>
+    <>
+      <ScrollView className="flex-1 bg-gray-50 px-4 py-6">
+        <View className="mb-6">
+          <Text className="text-2xl font-bold text-gray-800">Today's Appointments</Text>
+        </View>
 
-      {appointments.map((appointment) => (
-        <View 
-          key={appointment.appointment_id} 
-          className="bg-white rounded-xl mb-4 shadow-sm"
-        >
-          <View className="flex-row justify-between items-center p-4 border-b border-gray-100">
-            <Text className="text-base font-bold text-gray-800">
-              {appointment.order_id}
-            </Text>
-            <View className={`px-3 py-1 rounded-full ${
-              appointment.status === 'cancelled' 
-                ? 'bg-red-100' 
-                : 'bg-green-100'
-            }`}>
-              <Text className={`text-xs capitalize ${
-                appointment.status === 'cancelled'
-                  ? 'text-red-800'
-                  : 'text-green-800'
-              }`}>
-                {appointment.status}
-              </Text>
-            </View>
-          </View>
-
-          <View className="p-4">
-            <View className="space-y-2">
-              <View className="flex-row items-center">
-                <Icon name="user" size={16} className="text-gray-500" />
-                <Text className="ml-2 text-gray-600">
-                  {appointment.user_name}
+        {appointments.map((appointment) => (
+          <TouchableOpacity 
+            key={appointment.appointment_id} 
+            onPress={() => handleAppointmentPress(appointment)}
+          >
+            <View className="bg-white rounded-xl mb-4 shadow-sm">
+              <View className="flex-row justify-between items-center p-4 border-b border-gray-100">
+                <Text className="text-base font-bold text-gray-800">
+                  {appointment.order_id}
                 </Text>
+                <View className={`px-3 py-1 rounded-full ${
+                  appointment.status === 'cancelled' 
+                    ? 'bg-red-100' 
+                    : 'bg-green-100'
+                }`}>
+                  <Text className={`text-xs capitalize ${
+                    appointment.status === 'cancelled'
+                      ? 'text-red-800'
+                      : 'text-green-800'
+                  }`}>
+                    {appointment.status}
+                  </Text>
+                </View>
               </View>
 
-              <View className="flex-row items-center">
-                <Icon name="phone" size={16} className="text-gray-500" />
-                <Text className="ml-2 text-gray-600">
-                  {appointment.user_phone}
-                </Text>
+              <View className="p-4">
+                <View className="space-y-2">
+                  <View className="flex-row items-center">
+                    <Icon name="user" size={16} className="text-gray-500" />
+                    <Text className="ml-2 text-gray-600">
+                      {appointment.user_name}
+                    </Text>
+                  </View>
+
+                  <View className="flex-row items-center">
+                    <Icon name="phone" size={16} className="text-gray-500" />
+                    <Text className="ml-2 text-gray-600">
+                      {appointment.user_phone}
+                    </Text>
+                  </View>
+
+                  <View className="flex-row items-center">
+                    <Icon name="calendar" size={16} className="text-gray-500" />
+                    <Text className="ml-2 text-gray-600">
+                      {formatDate(appointment.appointmentDate)} at {formatTime(appointment.appointmentTime)}
+                    </Text>
+                  </View>
+                </View>
+
+                <View className="mt-4">
+                  <Text className="text-sm font-bold text-gray-800 mb-2">
+                    Services:
+                  </Text>
+                  {appointment.itemsSelected.map((item, index) => (
+                    <Text key={index} className="text-gray-600 ml-2 mb-1">
+                      • {item.service_type_name || 'No service selected'}
+                      {item.service_price ? ` - ₹${item.service_price}` : ''}
+                    </Text>
+                  ))}
+                </View>
+
+                <View className="mt-4 pt-3 border-t border-gray-100">
+                  <Text className="text-right text-base font-bold text-gray-800">
+                    Total: ₹{appointment.grandTotal}
+                  </Text>
+                </View>
               </View>
-
-              <View className="flex-row items-center">
-                <Icon name="calendar" size={16} className="text-gray-500" />
-                <Text className="ml-2 text-gray-600">
-                  {formatDate(appointment.appointmentDate)} at {formatTime(appointment.appointmentTime)}
-                </Text>
-              </View>
             </View>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
 
-            <View className="mt-4">
-              <Text className="text-sm font-bold text-gray-800 mb-2">
-                Services:
-              </Text>
-              {appointment.itemsSelected.map((item, index) => (
-                <Text key={index} className="text-gray-600 ml-2 mb-1">
-                  • {item.service_type_name || 'No service selected'}
-                  {item.service_price ? ` - ₹${item.service_price}` : ''}
-                </Text>
-              ))}
-            </View>
-
-            <View className="mt-4 pt-3 border-t border-gray-100">
-              <Text className="text-right text-base font-bold text-gray-800">
-                Total: ₹{appointment.grandTotal}
-              </Text>
-            </View>
+      {/* Modal for displaying appointment details */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          setModalVisible(!modalVisible);
+        }}
+      >
+        <View className="flex-1 justify-center items-center bg-black bg-opacity-50">
+          <View className="bg-white rounded-lg p-4 w-11/12">
+            {selectedAppointment && (
+              <>
+                <Text className="text-lg font-bold">{selectedAppointment.order_id}</Text>
+                <Text>Date: {formatDate(selectedAppointment.appointmentDate)}</Text>
+                <Text>Time: {formatTime(selectedAppointment.appointmentTime)}</Text>
+                <Text>Name: {selectedAppointment.user_name}</Text>
+                <Text>Phone: {selectedAppointment.user_phone}</Text>
+                <Text>Status: {selectedAppointment.status}</Text>
+                <Text>Total: ₹{selectedAppointment.grandTotal}</Text>
+                <Text>Services:</Text>
+                {selectedAppointment.itemsSelected.map((item, index) => (
+                  <Text key={index}>
+                    • {item.service_type_name || 'No service selected'} {item.service_price ? `- ₹${item.service_price}` : ''}
+                  </Text>
+                ))}
+              </>
+            )}
+            <TouchableOpacity onPress={() => setModalVisible(false)}>
+              <Text className="text-blue-500 text-center mt-4">Close</Text>
+            </TouchableOpacity>
           </View>
         </View>
-      ))}
-    </ScrollView>
+      </Modal>
+    </>
   );
 }
