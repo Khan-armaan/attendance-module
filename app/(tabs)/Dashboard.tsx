@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useUser } from '../../contexts/UserContext';
 import axios from 'axios';  // Import Axios
-
+import Toast from 'react-native-toast-message';
 
 interface AppointmentItem {
   service_type_id?: number;
@@ -122,13 +122,24 @@ export default function Dashboard() {
           status: 'completed',
         });
       console.log(response)
-        if (response) {
-          alert('Successfully updated the appointment');
-          // Optionally, you can refresh the appointments list here
-          fetchAppointments(); // Refresh appointments after update
-        } else {
-          alert('Failed to update the status of the appointment');
-        }
+      if (response) {
+        Toast.show({
+          type: 'success',
+          text1: 'Success',
+          text2: 'Successfully updated the appointment',
+          position: 'bottom',
+          visibilityTime: 2000,
+        });
+        fetchAppointments(); // Refresh appointments after update
+      } else {
+        Toast.show({
+          type: 'error',
+          text1: 'Error',
+          text2: 'Failed to update the status of the appointment',
+          position: 'bottom',
+          visibilityTime: 2000,
+        });
+      }
       } catch (error) {
         console.error('Error updating appointment:', error);
         alert('Failed to update the status of the appointment');
@@ -346,14 +357,14 @@ export default function Dashboard() {
                     ))}
 
                     {/* Conditionally render the Completed button */}
-                    {selectedAppointment.status !== 'completed' && (
+                    {selectedAppointment.status !== 'completed' && selectedAppointment.status !== 'cancelled'  ? (
                       <TouchableOpacity 
                         onPress={handleCompleteAppointment} 
                         className="bg-blue-500 rounded px-4 py-2 mt-4"
                       >
                         <Text className="text-white text-center">Completed</Text>
                       </TouchableOpacity>
-                    )}
+                    ) : (null)}
                   </>
                 )}
               </View>

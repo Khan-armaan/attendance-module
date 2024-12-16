@@ -48,7 +48,7 @@ export default function TabLayout() {
                 }}
               >
                 <FontAwesome name="cog" size={16} color="gray" className="mr-2" />
-                <Text className="ml-2">Profile</Text>
+                <Text className="ml-2">User Profile</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -80,6 +80,13 @@ export default function TabLayout() {
           options={{
             title: 'Dashboard',
             tabBarIcon: ({ color }) => <FontAwesome size={28} name="th-large" color={color} />,
+          }}
+        />
+           <Tabs.Screen
+          name="sales"
+          options={{
+            title: 'Sales',
+            tabBarIcon: ({ color }) => <FontAwesome size={28} name="line-chart" color={color} />,
           }}
         />
       </Tabs>

@@ -5,8 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { SubmitHandler, useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import axios from "axios";
-import { useState } from "react";
-import  UserData  from "../types";
+
 import { useUser } from '../contexts/UserContext';
 
 export  const  schema = z.object({
@@ -37,13 +36,14 @@ export default function Login() {
         phone: data.number,
         password: data.password
       });
-      
+      console.log(response.data)
       setUserData(response.data);
       
       if (response.data?.id) {
         router.push('/mark-attendance');
       }
     } catch (error) {
+      console.log(error)
       setError("root", {
         message: "Invalid phone number or password",                        
       });        
