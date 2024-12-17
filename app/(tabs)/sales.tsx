@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useUser } from '../../contexts/UserContext';
 import axios from "axios";
-import { View, Text, Dimensions } from 'react-native';
+import { View, Text, Dimensions, TouchableOpacity } from 'react-native';
 import { BarChart } from 'react-native-chart-kit';
+import Toast from "react-native-toast-message";
 
 interface Order {
     appointment_date: string;
@@ -53,6 +54,7 @@ export default function Sales() {
             data: chartValues.length > 0 ? chartValues : [0]
         }]
     };
+   
 
     return (
         <View style={{ padding: 16 }}>
@@ -91,6 +93,24 @@ export default function Sales() {
                         No sales data available
                     </Text>
                 )}
+                <TouchableOpacity 
+  onPress={() => {
+    console.log("Inside on press")
+    Toast.show({
+        type: 'success',
+        text1: 'Success!',
+        text2: 'Appointment marked as completed',
+        position: 'bottom',
+        visibilityTime: 4000,
+        autoHide: true,
+        topOffset: 30,
+        bottomOffset: 40,
+      });
+  }}
+  className="bg-blue-500 p-4 rounded-lg"
+>
+  <Text className="text-white">Test Toast</Text>
+</TouchableOpacity>
             </View>
         </View>
     )

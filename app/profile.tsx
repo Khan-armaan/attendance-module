@@ -6,7 +6,7 @@ import { useUser } from '../contexts/UserContext';  // Adjust the import path as
 import { useState } from 'react';
 import { FontAwesome } from '@expo/vector-icons';
 import { BackHandler } from 'react-native';
-import { useCallback } from 'react';
+
 
 export default function Profile() {
     const { userData } = useUser();

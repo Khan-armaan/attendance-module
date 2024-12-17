@@ -2,8 +2,10 @@ import { Text, View, ScrollView, ActivityIndicator, Modal, TouchableOpacity, Tou
 import { useState, useEffect } from "react";
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useUser } from '../../contexts/UserContext';
-import axios from 'axios';  // Import Axios
-import Toast from 'react-native-toast-message';
+import axios from 'axios';  
+
+
+
 
 interface AppointmentItem {
   service_type_id?: number;
@@ -67,18 +69,41 @@ interface CompletedAppointment {
   commission: string;
 }
 
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+
+const Tab = createMaterialTopTabNavigator();
+
+
 export default function Dashboard() {
+
+
+  return (
+    <>
+     <Tab.Navigator>
+      <Tab.Screen name="Upcoming" component={UpcomingAppointments} />
+      <Tab.Screen name="Completed" component={CompletedAppointments} />
+    </Tab.Navigator>
+   </>
+  );
+}
+
+function UpcomingAppointments(){
+
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const { userData } = useUser();
-  const [completedAppointments, setCompletedAppointments] = useState<CompletedAppointment[]>([]);
+  const [notificationModal, setNotificationModal] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState('');
+  const [completed, setCompleted] = useState(false)
+
+
 
   useEffect(() => {
     fetchAppointments();
-    fetchCompletedAppointments();
-  }, []);
+    fetchCompletedAppointments()
+  }, [completed]);
 
   const fetchAppointments = async () => {
     try {
@@ -95,11 +120,13 @@ export default function Dashboard() {
   const fetchCompletedAppointments = async () => {
     try {
       const response = await axios.get(`https://api-stage.feelaxo.com/api/staff/completed-orders?staff_id=${userData?.id}`);
-      setCompletedAppointments(response.data.data);
+     
     } catch (error) {
       console.error('Error fetching completed appointments:', error);
     }
   };
+
+ 
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString();
@@ -121,43 +148,38 @@ export default function Dashboard() {
           appointment_id: selectedAppointment.appointment_id,
           status: 'completed',
         });
-      console.log(response)
-      if (response) {
-        Toast.show({
-          type: 'success',
-          text1: 'Success',
-          text2: 'Successfully updated the appointment',
-          position: 'bottom',
-          visibilityTime: 2000,
-        });
-        fetchAppointments(); // Refresh appointments after update
+        setCompleted(true)
+     
+      if (response.status ) {
+        setModalVisible(false)
+    //   alert("appointment status updated successfully")
+       setNotificationMessage('Appointment status updated successfully');
+      setNotificationModal(true);
+       await fetchAppointments(); // Refresh appointments after update
+       setTimeout(() => {
+        setNotificationModal(false);
+      }, 2000);
+       
       } else {
-        Toast.show({
-          type: 'error',
-          text1: 'Error',
-          text2: 'Failed to update the status of the appointment',
-          position: 'bottom',
-          visibilityTime: 2000,
-        });
+   //    alert('appointment status not updated')
+       setNotificationMessage('Failed to update the status of the appointment');
+      setNotificationModal(true);
+        await fetchAppointments()
+
+        setTimeout(() => {
+          setNotificationModal(false);
+        }, 2000);
       }
       } catch (error) {
+        setNotificationMessage('Failed to update the status of the appointment')
+        setNotificationModal(true);
         console.error('Error updating appointment:', error);
-        alert('Failed to update the status of the appointment');
+    
       }
     }
   };
-
-  if (loading) {
-    return (
-      <View className="flex-1 justify-center items-center">
-        <ActivityIndicator size="large" color="#0066cc" />
-      </View>
-    );
-  }
-
-  return (
-    <>
-      <ScrollView className="flex-1 bg-gray-50 px-4 py-6">
+  return<>
+    <ScrollView className="flex-1 bg-gray-50 px-4 py-6">
         <View className="mb-6">
           <Text className="text-2xl font-bold text-gray-800">Upcoming Appointments</Text>
         </View>
@@ -238,6 +260,170 @@ export default function Dashboard() {
             </TouchableOpacity>
           ))
         )}
+
+      
+      </ScrollView>
+
+      {/* Modal for displaying appointment details */}
+      <Modal
+        visible={modalVisible}
+        transparent={true}
+        animationType="slide"
+      >
+        <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
+          <View className="flex-1 justify-center items-center bg-black bg-opacity-50">
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+              <View className="bg-white rounded-lg p-4 w-11/12 relative">
+                <TouchableOpacity 
+                  onPress={() => setModalVisible(false)} 
+                  className="absolute top-4 right-4"
+                >
+                
+                </TouchableOpacity>
+                {selectedAppointment && (
+                  <>
+                    <Text className="text-lg font-bold">{selectedAppointment.order_id}</Text>
+                    <Text>Date: {formatDate(selectedAppointment.appointmentDate)}</Text>
+                    <Text>Time: {formatTime(selectedAppointment.appointmentTime)}</Text>
+                    <Text>Name: {selectedAppointment.user_name}</Text>
+                    <Text>Phone: {selectedAppointment.user_phone}</Text>
+                    <Text>Status: {selectedAppointment.status}</Text>
+                    <Text>Total: ₹{selectedAppointment.grandTotal}</Text>
+                    <Text>Services:</Text>
+                    {selectedAppointment.itemsSelected.map((item, index) => (
+                      <Text key={index}>
+                        • {item.service_type_name || 'No service selected'} {item.service_price ? `- ₹${item.service_price}` : ''}
+                      </Text>
+                    ))}
+
+                    {/* Conditionally render the Completed button */}
+                    {selectedAppointment.status !== 'completed' && selectedAppointment.status !== 'cancelled'  ? (
+                      <TouchableOpacity 
+                        onPress={handleCompleteAppointment} 
+                        className="bg-blue-500 rounded px-4 py-2 mt-4"
+                      >
+                        <Text className="text-white text-center">Completed</Text>
+                      </TouchableOpacity>
+                    ) : (null)}
+                  </>
+                )}
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+      <Modal 
+       visible={notificationModal}
+       transparent={true}
+       animationType="fade"
+       >
+        <View className="flex-1 justify-center items-center">
+        <View className="bg-black bg-opacity-70 px-6 py-4 rounded-lg">
+          <Text className="text-white text-center">
+            {notificationMessage}
+          </Text>
+        </View>
+      </View>
+       </Modal>
+    
+    </>
+  
+}
+
+
+
+
+
+
+function  CompletedAppointments(){
+  
+  const [loading, setLoading] = useState(true);
+  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const { userData } = useUser();
+  const [completedAppointments, setCompletedAppointments] = useState<CompletedAppointment[]>([]);
+  const [notificationModal, setNotificationModal] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState('');
+
+  useEffect(() => {
+   
+    fetchCompletedAppointments();
+  }, []);
+
+
+
+  const fetchCompletedAppointments = async () => {
+    try {
+      const response = await axios.get(`https://api-stage.feelaxo.com/api/staff/completed-orders?staff_id=${userData?.id}`);
+      setCompletedAppointments(response.data.data);
+      setLoading(false)
+    } catch (error) {
+      console.error('Error fetching completed appointments:', error);
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString();
+  };
+
+  const formatTime = (timeString: string) => {
+    return timeString.substring(0, 5);
+  };
+
+  const handleAppointmentPress = (appointment: Appointment) => {
+    setSelectedAppointment(appointment);
+    setModalVisible(true);
+  };
+
+  const handleCompleteAppointment = async () => {
+    if (selectedAppointment) {
+      try {
+        const response = await axios.put('https://api-stage.feelaxo.com/api/staff/appointment/update', {
+          appointment_id: selectedAppointment.appointment_id,
+          status: 'completed',
+        });
+     
+      if (response.status ) {
+        setModalVisible(false)
+    //   alert("appointment status updated successfully")
+       setNotificationMessage('Appointment status updated successfully');
+      setNotificationModal(true);
+     await fetchCompletedAppointments()
+       setTimeout(() => {
+        setNotificationModal(false);
+      }, 2000);
+       
+      } else {
+   //    alert('appointment status not updated')
+       setNotificationMessage('Failed to update the status of the appointment');
+      setNotificationModal(true);
+       await fetchCompletedAppointments()
+
+        setTimeout(() => {
+          setNotificationModal(false);
+        }, 2000);
+      }
+      } catch (error) {
+        setNotificationMessage('Failed to update the status of the appointment')
+        setNotificationModal(true);
+        console.error('Error updating appointment:', error);
+    
+      }
+    }
+  };
+
+  if (loading) {
+    return (
+      <View className="flex-1 justify-center items-center">
+        <ActivityIndicator size="large" color="#0066cc" />
+      </View>
+    );
+  }
+
+
+  return<>
+  <ScrollView className="flex-1 bg-gray-50 px-4 py-6">
+      
 
         <View className="mb-6 mt-8">
           <Text className="text-2xl font-bold text-gray-800">Completed Appointments</Text>
@@ -338,7 +524,7 @@ export default function Dashboard() {
                   onPress={() => setModalVisible(false)} 
                   className="absolute top-4 right-4"
                 >
-                  <Text className="text-blue-500">Close</Text>
+                
                 </TouchableOpacity>
                 {selectedAppointment && (
                   <>
@@ -372,6 +558,19 @@ export default function Dashboard() {
           </View>
         </TouchableWithoutFeedback>
       </Modal>
-    </>
-  );
+      <Modal 
+       visible={notificationModal}
+       transparent={true}
+       animationType="fade"
+       >
+        <View className="flex-1 justify-center items-center">
+        <View className="bg-black bg-opacity-70 px-6 py-4 rounded-lg">
+          <Text className="text-white text-center">
+            {notificationMessage}
+          </Text>
+        </View>
+      </View>
+       </Modal>
+    
+  </>
 }
