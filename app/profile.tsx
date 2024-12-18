@@ -9,8 +9,13 @@ import { BackHandler } from 'react-native';
 
 
 export default function Profile() {
-    const { userData } = useUser();
+    const { userData, setUserData } = useUser();
     const [showMenu, setShowMenu] = useState(false);
+
+    const handleLogout = () => {
+        setUserData(null);
+        router.replace('/');
+    };
 
     React.useEffect(() => {
         const onBackPress = () => {
@@ -65,6 +70,17 @@ export default function Profile() {
                             >
                                 <FontAwesome name="cog" size={16} color="gray" className="mr-2" />
                                 <Text className="ml-2">Profile</Text>
+                            </TouchableOpacity>
+                            
+                            <TouchableOpacity 
+                                className="flex-row items-center px-4 py-2 hover:bg-gray-100"
+                                onPress={() => {
+                                    handleLogout();
+                                    setShowMenu(false);
+                                }}
+                            >
+                                <FontAwesome name="sign-out" size={16} color="red" className="mr-2" />
+                                <Text className="ml-2 text-red-500">Logout</Text>
                             </TouchableOpacity>
                         </View>
                     )}

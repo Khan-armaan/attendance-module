@@ -1,13 +1,20 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Link, router, Tabs } from 'expo-router';
-import { View, Image, TouchableOpacity, Modal, TouchableWithoutFeedback, Text } from 'react-native';
-import { useState } from 'react';
+import { View, Image, TouchableOpacity, Text } from 'react-native';
+import { useEffect, useState } from 'react';
 import { useUser } from '../../contexts/UserContext';
-//if using the Tabs from the ex
+import axios from 'axios';
+
 
 export default function TabLayout() {
   const [showMenu, setShowMenu] = useState(false);
   const { userData } = useUser();
+  const [changed, setchanged] = useState(false)
+
+
+
+
+
   return (
     <View className="flex-1">
 
@@ -64,7 +71,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="mark-attendance"
           options={{
-            title: 'Home',
+            title: 'Check In',
             tabBarIcon: ({ color }) => <FontAwesome size={28} name="home" color={color} />,
           }}
         />
@@ -90,6 +97,10 @@ export default function TabLayout() {
           }}
         />
       </Tabs>
+
+        
+        
+
     </View>
   );
 }

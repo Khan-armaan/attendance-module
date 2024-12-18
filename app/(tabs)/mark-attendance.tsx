@@ -1,8 +1,6 @@
 import { Text, View, TouchableOpacity } from "react-native";
 import { useState, useEffect } from "react";
 import Icon from 'react-native-vector-icons/FontAwesome';
-import staffData from '../../data/staffData.json';
-import axios from "axios"
 import * as Location from 'expo-location';
 import Toast from 'react-native-toast-message';
 import { useUser } from '../../contexts/UserContext';
@@ -116,12 +114,12 @@ export default function MarkAttendance() {
         }
 
         try {
-            const response = await axios.put('https://api-stage.feelaxo.com/api/attendance/status', {
-                staff_id: userData?.id,
-                lat: lat,
-                long: long,
-                status: "in"
-            });
+  //          const response = await axios.put('https://api-stage.feelaxo.com/api/attendance/status', {
+    //            staff_id: userData?.id,
+      //          lat: lat,
+        //        long: long,
+          //      status: "in"
+          //       });
 
             setIsTracking(true);
             const now = new Date().toLocaleTimeString('en-US', {
@@ -132,15 +130,15 @@ export default function MarkAttendance() {
             });
             setCheckInTime(now);
             setCheckedIn(true);
-
+       
            
             Toast.show({
                 type: 'success',
-                text1: 'Check In',
-                text2: response.data.message,
-                position: 'top',
+               text1: 'Check In',
+               text2: "check in successfull",
+              position: 'top',
                 visibilityTime: 3000,
-            });
+          });
         } catch (error: any) {
             console.error('CheckIn error:', error.response?.data || error.message);
             Toast.show({
@@ -171,12 +169,12 @@ export default function MarkAttendance() {
         }
 
         try {
-            const response = await axios.put('https://api-stage.feelaxo.com/api/attendance/status', {
-                staff_id: userData?.id,
-                lat: lat,
-                long: long,
-                status: "out"
-            });
+   //         const response = await axios.put('https://api-stage.feelaxo.com/api/attendance/status', {
+   //             staff_id: userData?.id,
+   //             lat: lat,
+   //             long: long,
+   //             status: "out"
+   //         });
             
             setIsTracking(false);
             setCheckedOut(true);
@@ -186,7 +184,7 @@ export default function MarkAttendance() {
             Toast.show({
                 type: 'success',
                 text1: 'Check Out',
-                text2: response.data.message,
+                text2: 'check out successfull',
                 position: 'top',
                 visibilityTime: 3000,
             });

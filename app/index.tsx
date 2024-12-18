@@ -16,7 +16,12 @@ export  const  schema = z.object({
 type FormFields = z.infer<typeof schema>;
 
 export default function Login() {
-  const { setUserData } = useUser();
+  const { setUserData, userData } = useUser();
+
+  if (userData?.id) {
+  router.replace('/Dashboard')
+  return null
+  }
   const {
     control,
     handleSubmit,
@@ -40,7 +45,7 @@ export default function Login() {
       setUserData(response.data);
       
       if (response.data?.id) {
-        router.push('/mark-attendance');
+        router.push('/Dashboard');
       }
     } catch (error) {
       console.log(error)

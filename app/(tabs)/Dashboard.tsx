@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useUser } from '../../contexts/UserContext';
 import axios from 'axios';  
-
+import Toast from 'react-native-toast-message';
 
 
 
@@ -70,12 +70,17 @@ interface CompletedAppointment {
 }
 
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import { Redirect } from "expo-router";
+
 
 const Tab = createMaterialTopTabNavigator();
 
 
 export default function Dashboard() {
-
+  const { userData } = useUser();
+if (!userData?.id){
+  return <Redirect href='/'></Redirect>
+}
 
   return (
     <>
@@ -154,7 +159,15 @@ function UpcomingAppointments(){
         setModalVisible(false)
     //   alert("appointment status updated successfully")
        setNotificationMessage('Appointment status updated successfully');
-      setNotificationModal(true);
+    //  setNotificationModal(true);
+      
+    Toast.show({
+      type: 'success',
+     text1: 'Done',
+     text2: 'Appointment status updated successfully',
+    position: 'top',
+      visibilityTime: 3000,
+});
        await fetchAppointments(); // Refresh appointments after update
        setTimeout(() => {
         setNotificationModal(false);
@@ -163,8 +176,15 @@ function UpcomingAppointments(){
       } else {
    //    alert('appointment status not updated')
        setNotificationMessage('Failed to update the status of the appointment');
-      setNotificationModal(true);
-        await fetchAppointments()
+    //  setNotificationModal(true);
+    Toast.show({
+      type: 'success',
+     text1: 'Error',
+     text2: 'Failed to update the status of the appointment',
+    position: 'top',
+      visibilityTime: 3000,
+}); 
+    await fetchAppointments()
 
         setTimeout(() => {
           setNotificationModal(false);
@@ -344,6 +364,7 @@ function  CompletedAppointments(){
   const [completedAppointments, setCompletedAppointments] = useState<CompletedAppointment[]>([]);
   const [notificationModal, setNotificationModal] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState('');
+  const [refresh, setRefresh] = useState(false)
 
   useEffect(() => {
    
@@ -354,9 +375,11 @@ function  CompletedAppointments(){
 
   const fetchCompletedAppointments = async () => {
     try {
+      
       const response = await axios.get(`https://api-stage.feelaxo.com/api/staff/completed-orders?staff_id=${userData?.id}`);
       setCompletedAppointments(response.data.data);
       setLoading(false)
+
     } catch (error) {
       console.error('Error fetching completed appointments:', error);
     }
@@ -425,8 +448,16 @@ function  CompletedAppointments(){
   <ScrollView className="flex-1 bg-gray-50 px-4 py-6">
       
 
-        <View className="mb-6 mt-8">
+        <View className="mb-6 mt-8 flex-row justify-between items-center">
           <Text className="text-2xl font-bold text-gray-800">Completed Appointments</Text>
+          <TouchableOpacity 
+        
+            onPress={() =>  fetchCompletedAppointments()}
+            className="bg-blue-500 px-4 py-2 rounded-lg flex-row items-center"
+          >
+            <Icon name="refresh" size={16} color="white" className="mr-2" />
+            <Text className="text-white font-medium">Refresh</Text>
+          </TouchableOpacity>
         </View>
 
         {completedAppointments.length === 0 ? (
