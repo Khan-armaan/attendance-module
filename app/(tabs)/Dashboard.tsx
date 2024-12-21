@@ -214,12 +214,12 @@ function UpcomingAppointments(){
               key={appointment.appointment_id} 
               onPress={() => handleAppointmentPress(appointment)}
             >
-              <View className="bg-white rounded-xl mb-4 shadow-sm">
+              <View className="bg-white rounded-xl mb-4 shadow-sm border border-black">
                 <View className="flex-row justify-between items-center p-4 border-b border-gray-100">
                   <Text className="text-base font-bold text-gray-800">
                     {appointment.order_id}
                   </Text>
-                  <View className={`px-3 py-1 rounded-full ${
+                  <View className={`px-3 py-1 rounded-full border border-black ${
                     appointment.status === 'cancelled' 
                       ? 'bg-red-100' 
                       : 'bg-green-100'
@@ -470,12 +470,12 @@ function  CompletedAppointments(){
               key={appointment.appointment_id} 
               onPress={() => handleAppointmentPress(appointment)}
             >
-              <View className="bg-white rounded-xl mb-4 shadow-sm">
+              <View className="bg-white rounded-xl mb-4 shadow-sm border border-black">
                 <View className="flex-row justify-between items-center p-4 border-b border-gray-100">
                   <Text className="text-base font-bold text-gray-800">
                     {appointment.order_id}
                   </Text>
-                  <View className={`px-3 py-1 rounded-full ${
+                  <View className={`px-3 py-1 rounded-full border border-black ${
                     appointment.status === 'completed' 
                       ? 'bg-green-100' 
                       : 'bg-red-100'

@@ -1,9 +1,12 @@
 import { Text, View, TouchableOpacity } from "react-native";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import Icon from 'react-native-vector-icons/FontAwesome';
-import * as Location from 'expo-location';
 import Toast from 'react-native-toast-message';
 import { useUser } from '../../contexts/UserContext';
+import { useState} from 'react';
+import axios from 'axios';
+
+import * as Location from 'expo-location';
 
 export default function MarkAttendance() {
     // states variables 
@@ -15,61 +18,70 @@ export default function MarkAttendance() {
     const [checkInTime, setCheckInTime] = useState<string | null>(null)
     const [checkedIn, setCheckedIn] = useState(false)
     const [checkedOut, setCheckedOut] = useState(false)
+    const [lastApiUpdate, setLastApiUpdate] = useState<Date | null>(null);
     
     const { userData } = useUser();
     
-    let numberOfRequest = 0          // global variable for the number of request sent 
+   
+
+        async function getCurrentLocation() {
+          try {
+            let { status } = await Location.requestForegroundPermissionsAsync();
+            if (status !== 'granted') {
+              setErrorMsg('Permission to access location was denied');
+              return null;
+            }
+    
+            let location = await Location.getCurrentPositionAsync({
+              accuracy: Location.Accuracy.Balanced,
+              timeInterval: 10000,
+              distanceInterval: 10,
+              mayShowUserSettingsDialog: true
+            });
+            
+            if (location.coords.accuracy && location.coords.accuracy > 100) {
+              setErrorMsg('Location accuracy is too low. Please check your GPS settings.');
+              return null;
+            }
+            
+            setLocation(location);
+            return location;
+          } catch (error) {
+            setErrorMsg('Error getting location: ' + error);
+            console.error('Location error:', error);
+            return null;
+          }
+        }
+   
+     
     
 
 
-    useEffect(() => {
-        let locationInterval: NodeJS.Timeout | null = null;
-          
-        async function getCurrentLocation() {
-            console.log('Getting current location...');
-            
-            let { status } = await Location.requestForegroundPermissionsAsync();
-            if (status !== 'granted') {
-                console.log('Location permission denied');
-                setErrorMsg('Permission to access location was denied');
-                return;
-            }
-            
-            let location = await Location.getCurrentPositionAsync({});
-            console.log('New location:', {
-                latitude: location.coords.latitude,
-                longitude: location.coords.longitude
-            });
-            setLocation(location);
-        }
-
-        // Initial location fetch
-        getCurrentLocation();
-
-        if (isTracking) {
-            // Start location tracking
-            locationInterval = setInterval(() => {
-                getCurrentLocation();
-            }, 1000 * 60 * 10);
-             // Every 10 minutes
-        }
-
-        return () => {
-            if (locationInterval) clearInterval(locationInterval);
-        };
-    }, [isTracking]); // Add isTracking to dependency array
-      let text = 'Waiting...';  // this all code is there since the location can be empty  
-      let long = 0;
+  
       let lat = 0;
+      let long = 0;
+
+      let text = 'Waiting...';    
       if (errorMsg) {
         text = errorMsg;
       } else if (location) {
-        text = JSON.stringify(location.coords);
-        long = location.coords.longitude;
+        text = JSON.stringify(location);
         lat = location.coords.latitude;
-       
+        long = location.coords.longitude;
       }
-    
+   
+
+
+      
+
+
+
+
+
+
+
+
+
 
     // created a clock 
     useEffect(() => {
@@ -80,6 +92,8 @@ export default function MarkAttendance() {
         }, 1000);
         return () => clearInterval(timer);
     }, []);
+
+
     const updateDateTime = () => {
         const now = new Date();
         setCurrentDate(now.toLocaleDateString('en-GB', {
@@ -113,13 +127,24 @@ export default function MarkAttendance() {
             return;
         }
 
+        // Get initial location before checking in
+        const currentLocation = await getCurrentLocation();
+        if (!currentLocation) {
+            Toast.show({
+                type: 'error',
+                text1: 'Location Error',
+                text2: 'Unable to get your location. Please try again.',
+                position: 'top',
+            });
+            return;
+        }
+
         try {
-  //          const response = await axios.put('https://api-stage.feelaxo.com/api/attendance/status', {
-    //            staff_id: userData?.id,
-      //          lat: lat,
-        //        long: long,
-          //      status: "in"
-          //       });
+           const response = await axios.put('https://api-stage.feelaxo.com/api/attendance/status', {
+              staff_id: userData?.id,
+              lat: lat,
+            long: long,
+             });
 
             setIsTracking(true);
             const now = new Date().toLocaleTimeString('en-US', {
@@ -135,7 +160,7 @@ export default function MarkAttendance() {
             Toast.show({
                 type: 'success',
                text1: 'Check In',
-               text2: "check in successfull",
+               text2: response.data.message,
               position: 'top',
                 visibilityTime: 3000,
           });
@@ -169,12 +194,12 @@ export default function MarkAttendance() {
         }
 
         try {
-   //         const response = await axios.put('https://api-stage.feelaxo.com/api/attendance/status', {
-   //             staff_id: userData?.id,
-   //             lat: lat,
-   //             long: long,
-   //             status: "out"
-   //         });
+            const response = await axios.put('https://api-stage.feelaxo.com/api/attendance/status', {
+               staff_id: userData?.id,
+               lat: lat,
+               long: long,
+             
+        });
             
             setIsTracking(false);
             setCheckedOut(true);
@@ -200,10 +225,45 @@ export default function MarkAttendance() {
         }
    }
 
+
+   // Add new useEffect for continuous location tracking and API updates
+   useEffect(() => {
+        let locationInterval: NodeJS.Timeout;
+        
+        if (checkedIn && !checkedOut) {
+            locationInterval = setInterval(async () => {
+                const now = new Date();
+                // Only update if last update was more than 10 minutes ago
+                if (!lastApiUpdate || now.getTime() - lastApiUpdate.getTime() >= 600000) {
+                    const currentLocation = await getCurrentLocation();
+                    if (currentLocation && userData?.id) {
+                        try {
+                            await axios.put('https://api-stage.feelaxo.com/api/attendance/status', {
+                                staff_id: userData.id,
+                                lat: currentLocation.coords.latitude,
+                                long: currentLocation.coords.longitude,
+                            });
+                            setLastApiUpdate(now);
+                        } catch (error) {
+                            console.error('Location update error:', error);
+                        }
+                    }
+                }
+            }, 600000); // Check every 10 minutes instead of 5 seconds
+        }
+
+        return () => {
+            if (locationInterval) {
+                clearInterval(locationInterval);
+            }
+        };
+    }, [checkedIn, checkedOut, userData?.id, lastApiUpdate]);
+
+
     return (
         <>
             <View className="flex-1 bg-gray-100 p-4 justify-center">
-                <View className="bg-white rounded-3xl p-8 shadow-md my-8">
+                <View className="bg-white rounded-3xl p-8 shadow-md my-8 border-2 border-black">
                    
                     <View className="items-center mb-8">
                        
@@ -239,6 +299,7 @@ export default function MarkAttendance() {
                         <View className="flex-row items-center mb-3">
                             <Icon name="clock-o" size={20} color="#666" />
                             <Text className="text-gray-600 ml-3">Time: {currentTime}</Text>
+                          
                         </View>
                       
                     </View>

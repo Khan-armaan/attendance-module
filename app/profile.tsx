@@ -12,9 +12,13 @@ export default function Profile() {
     const { userData, setUserData } = useUser();
     const [showMenu, setShowMenu] = useState(false);
 
-    const handleLogout = () => {
-        setUserData(null);
-        router.replace('/');
+    const handleLogout = async () => {
+        try {
+            await setUserData(null); // This will clear the stored data
+            router.replace('/');
+          } catch (error) {
+            console.error('Error logging out:', error);
+          }
     };
 
     React.useEffect(() => {
@@ -60,9 +64,9 @@ export default function Profile() {
                     </TouchableOpacity>
 
                     {showMenu && (
-                        <View className="absolute top-12 right-0 bg-white rounded-lg shadow-lg w-40 py-2 z-50">
+                        <View className="absolute top-12 right-0 bg-white rounded-lg shadow-lg w-40 py-2 z-50 elevation-3">
                             <TouchableOpacity 
-                                className="flex-row items-center px-4 py-2 hover:bg-gray-100"
+                                className="flex-row items-center px-4 py-2"
                                 onPress={() => {
                                     router.replace('/profile')
                                     setShowMenu(false);
@@ -72,16 +76,7 @@ export default function Profile() {
                                 <Text className="ml-2">Profile</Text>
                             </TouchableOpacity>
                             
-                            <TouchableOpacity 
-                                className="flex-row items-center px-4 py-2 hover:bg-gray-100"
-                                onPress={() => {
-                                    handleLogout();
-                                    setShowMenu(false);
-                                }}
-                            >
-                                <FontAwesome name="sign-out" size={16} color="red" className="mr-2" />
-                                <Text className="ml-2 text-red-500">Logout</Text>
-                            </TouchableOpacity>
+                           
                         </View>
                     )}
                 </View>
@@ -146,6 +141,18 @@ export default function Profile() {
                             <Text className="font-medium text-green-800">{userData?.commission}%</Text>
                         </View>
                     </View>
+                </View>
+                <View className="flex-row justify-center">
+                <TouchableOpacity 
+                                className="flex-row items-center px-4 py-2"
+                                onPress={() => {
+                                    handleLogout();
+                                    setShowMenu(false);
+                                }}
+                            >
+                                <FontAwesome name="sign-out" size={16} color="red" className="mr-2" />
+                                <Text className="ml-2 text-red-500">Logout</Text>
+                            </TouchableOpacity>
                 </View>
             </ScrollView>
         </View>

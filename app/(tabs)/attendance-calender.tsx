@@ -1,4 +1,4 @@
-import { Text, View, Modal, TouchableOpacity, Pressable } from "react-native";
+import { Text, View, Modal, Pressable } from "react-native";
 import { Calendar } from 'react-native-calendars';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
@@ -99,11 +99,12 @@ export default function AttendanceCalendar() {
       const marks: Record<string, any> = {};
       response.data.attendance.forEach(record => {
         const date = record.created_at.split('T')[0];
-        const lastStatus = Object.values(record.time).pop();
+        // Check if any status in the time object is "in"
+        const hasInStatus = Object.values(record.time).includes('in');
         
         marks[date] = {
           selected: true,
-          selectedColor: lastStatus === 'in' ? '#4ade80' : '#ef4444',
+          selectedColor: hasInStatus ? '#4ade80' : '#ef4444', // green if present, red if absent
           disableTouchEvent: false
         };
       });
@@ -123,7 +124,7 @@ export default function AttendanceCalendar() {
 
   return (
     <View className="flex-1 justify-center items-center bg-white p-4">
-      <View className="w-11/12 max-w-xl shadow-xl rounded-xl border border-gray-200">
+      <View className="w-11/12 max-w-xl shadow-xl rounded-xl border-2 border-black">
         <Calendar
           onDayPress={handleDayPress}
           markedDates={{
