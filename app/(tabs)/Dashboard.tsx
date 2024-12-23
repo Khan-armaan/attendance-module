@@ -291,7 +291,7 @@ function UpcomingAppointments(){
         animationType="slide"
       >
         <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
-          <View className="flex-1 justify-center items-center bg-black bg-opacity-50">
+          <View className="flex-1 justify-center items-center bg-black/50">
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
               <View className="bg-white rounded-lg p-4 w-11/12 relative">
                 <TouchableOpacity 
@@ -377,7 +377,9 @@ function  CompletedAppointments(){
     try {
       
       const response = await axios.get(`https://api-stage.feelaxo.com/api/staff/completed-orders?staff_id=${userData?.id}`);
+     console.log(response.data)
       setCompletedAppointments(response.data.data);
+    
       setLoading(false)
 
     } catch (error) {
@@ -545,10 +547,10 @@ function  CompletedAppointments(){
       <Modal
         visible={modalVisible}
         transparent={true}
-        animationType="slide"
+       
       >
         <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
-          <View className="flex-1 justify-center items-center bg-black bg-opacity-50">
+          <View className="flex-1 justify-center items-center bg-black/50  border border-black">
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
               <View className="bg-white rounded-lg p-4 w-11/12 relative">
                 <TouchableOpacity 
@@ -592,7 +594,7 @@ function  CompletedAppointments(){
       <Modal 
        visible={notificationModal}
        transparent={true}
-       animationType="fade"
+      
        >
         <View className="flex-1 justify-center items-center">
         <View className="bg-black bg-opacity-70 px-6 py-4 rounded-lg">

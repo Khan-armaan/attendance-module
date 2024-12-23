@@ -20,10 +20,10 @@ export default function MarkAttendance() {
     const [checkedOut, setCheckedOut] = useState(false)
     const [lastApiUpdate, setLastApiUpdate] = useState<Date | null>(null);
     
-    const { userData } = useUser();
+    const { userData } = useUser();  // to get the user information
     
    
-
+// function to fetch the location 
         async function getCurrentLocation() {
           try {
             let { status } = await Location.requestForegroundPermissionsAsync();
@@ -57,18 +57,17 @@ export default function MarkAttendance() {
     
 
 
-  
-      let lat = 0;
-      let long = 0;
+    //   let lat = 0;
+    //   let long = 0;
 
-      let text = 'Waiting...';    
-      if (errorMsg) {
-        text = errorMsg;
-      } else if (location) {
-        text = JSON.stringify(location);
-        lat = location.coords.latitude;
-        long = location.coords.longitude;
-      }
+    //   let text = 'Waiting...';    
+    //   if (errorMsg) {
+    //     text = errorMsg;
+    //   } else if (location) {
+    //     text = JSON.stringify(location);
+    //     lat = location.coords.latitude;
+    //     long = location.coords.longitude;
+    //   } 
    
 
 
@@ -129,6 +128,7 @@ export default function MarkAttendance() {
 
         // Get initial location before checking in
         const currentLocation = await getCurrentLocation();
+
         if (!currentLocation) {
             Toast.show({
                 type: 'error',
@@ -142,18 +142,23 @@ export default function MarkAttendance() {
         try {
            const response = await axios.put('https://api-stage.feelaxo.com/api/attendance/status', {
               staff_id: userData?.id,
-              lat: lat,
-            long: long,
+              lat: currentLocation.coords.latitude,
+              long: currentLocation.coords.longitude,
              });
-
+             console.log(response.data.time);
+            if (response.data.time === 'out'){
+                Toast.show({
+                    type: 'Error',
+                    text1: 'Location',
+                    text2: 'You are not in the office',
+                    position: 'top',
+                    visibilityTime: 3000,
+                })
+                return
+            }
             setIsTracking(true);
-            const now = new Date().toLocaleTimeString('en-US', {
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
-                hour12: false
-            });
-            setCheckInTime(now);
+          
+            setCheckInTime(response.data.time);
             setCheckedIn(true);
        
            
@@ -192,14 +197,27 @@ export default function MarkAttendance() {
             });
             return;
         }
+              // Get initial location before checking in
+              const currentLocation = await getCurrentLocation();
+
+              if (!currentLocation) {
+                  Toast.show({
+                      type: 'error',
+                      text1: 'Location Error',
+                      text2: 'Unable to get your location. Please try again.',
+                      position: 'top',
+                  });
+                  return;
+              }
 
         try {
             const response = await axios.put('https://api-stage.feelaxo.com/api/attendance/status', {
                staff_id: userData?.id,
-               lat: lat,
-               long: long,
+               lat: currentLocation.coords.latitude,
+               long: currentLocation.coords.longitude,
              
         });
+        console.log(response.data.time);
             
             setIsTracking(false);
             setCheckedOut(true);
