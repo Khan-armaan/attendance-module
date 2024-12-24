@@ -48,6 +48,12 @@ const calculateDuration = (checkIn: string, checkOut: string): string => {
   }
 };
 
+// Add this type for time entries
+interface TimeEntry {
+  time: string;
+  status: 'in' | 'out';
+}
+
 export default function AttendanceCalendar() {
 
   // state variables  
@@ -164,7 +170,7 @@ export default function AttendanceCalendar() {
           onPress={() => setShowModal(false)}
         >
           <Pressable 
-            className="bg-white p-6 rounded-lg m-4 w-[80%]"
+            className="bg-white p-6 rounded-lg m-4 w-[90%] max-h-[80%]"
             onPress={(e) => e.stopPropagation()}
           >
             {isLoading ? (
@@ -176,37 +182,54 @@ export default function AttendanceCalendar() {
                 </Text>
                 {attendanceData?.attendance.length ? (
                   <View>
-                    <View className="bg-green-100 p-3 rounded-md mb-2">
-                      <Text className="font-semibold">TIME IN</Text>
-                      <Text>
-                        {Object.keys(attendanceData.attendance[0].time)[0]}
-                      </Text>
+                    {/* Table Header */}
+                    <View className="flex-row border-b border-gray-200 pb-2 mb-2">
+                      <Text className="flex-1 font-bold text-gray-700">Time In</Text>
+                      <Text className="flex-1 font-bold text-gray-700">Time Out</Text>
+                      <Text className="flex-1 font-bold text-gray-700">Duration</Text>
                     </View>
-                    
-                    <View className="bg-red-100 p-3 rounded-md mb-2">
-                      <Text className="font-semibold">OUT OF OFFICE</Text>
-                      <Text>
-                        {Object.entries(attendanceData.attendance[0].time)
-                          .filter(([_, status]) => status === 'out')
-                          .slice(-1)[0]?.[0] || 'Still Working'}
-                      </Text>
-                    </View>
-                    
-                    <View className="bg-blue-100 p-3 rounded-md">
-                      <Text className="font-semibold">DURATION</Text>
-                      <Text>
-                        {attendanceData?.attendance.length ? (() => {
-                          const timeEntries = Object.entries(attendanceData.attendance[0].time);
-                          const checkInTime = timeEntries[0]?.[0];
-                          const checkOutEntry = timeEntries.filter(([_, status]) => status === 'out').pop();
-                          const checkOutTime = checkOutEntry?.[0];
-                          
-                          console.log('Check-in time:', checkInTime); // For debugging
-                          console.log('Check-out time:', checkOutTime); // For debugging
-                          
-                          return calculateDuration(checkInTime, checkOutTime || "");
-                        })() : '-'}
-                      </Text>
+
+                    {/* Table Content */}
+                    <View className="max-h-[400px]">
+                      {(() => {
+                        const timeEntries = Object.entries(attendanceData.attendance[0].time)
+                          .map(([time, status]) => ({ time, status }));
+
+                        let inOutPairs: { in: string; out: string }[] = [];
+                        let currentIn: string | null = null;
+
+                        timeEntries.forEach((entry) => {
+                          if (entry.status === 'in') {
+                            currentIn = entry.time;
+                          } else if (entry.status === 'out' && currentIn) {
+                            inOutPairs.push({
+                              in: currentIn,
+                              out: entry.time
+                            });
+                            currentIn = null;
+                          }
+                        });
+
+                        // If there's a remaining "in" without an "out"
+                        if (currentIn) {
+                          inOutPairs.push({
+                            in: currentIn,
+                            out: ''
+                          });
+                        }
+
+                        return inOutPairs.map((pair, index) => (
+                          <View key={index} className="flex-row py-2 border-b border-gray-100">
+                            <Text className="flex-1 text-green-600">{pair.in}</Text>
+                            <Text className="flex-1 text-red-600">
+                              {pair.out || 'Not checked out'}
+                            </Text>
+                            <Text className="flex-1 text-blue-600">
+                              {calculateDuration(pair.in, pair.out)}
+                            </Text>
+                          </View>
+                        ));
+                      })()}
                     </View>
                   </View>
                 ) : (

@@ -12,7 +12,7 @@ export default function MarkAttendance() {
     // states variables 
     const [currentTime, setCurrentTime] = useState('');
     const [currentDate, setCurrentDate] = useState('');
-    const [location, setLocation] = useState<Location.LocationObject | null>(null);
+    const [coordinates, setCoordinates] = useState<Location.LocationObject | null>(null);
     const [errorMsg, setErrorMsg] = useState<string | null>(null); 
     const [isTracking, setIsTracking] = useState(false);
     const [checkInTime, setCheckInTime] = useState<string | null>(null)
@@ -24,37 +24,68 @@ export default function MarkAttendance() {
     
    
 // function to fetch the location 
-        async function getCurrentLocation() {
-          try {
-            let { status } = await Location.requestForegroundPermissionsAsync();
-            if (status !== 'granted') {
-              setErrorMsg('Permission to access location was denied');
-              return null;
-            }
+        // async function getCurrentLocation() {
+        //   try {
+        //     let { status } = await Location.requestForegroundPermissionsAsync();
+        //     if (status !== 'granted') {
+        //       setErrorMsg('Permission to access location was denied');
+        //       return null;
+        //     }
     
-            let location = await Location.getCurrentPositionAsync({
-              accuracy: Location.Accuracy.Balanced,
-              timeInterval: 10000,
-              distanceInterval: 10,
-              mayShowUserSettingsDialog: true
-            });
+        //     let location = await Location.getCurrentPositionAsync({
+        //       accuracy: Location.Accuracy.Balanced,
+        //       timeInterval: 10000,
+        //       distanceInterval: 10,
+        //       mayShowUserSettingsDialog: true
+        //     });
             
-            if (location.coords.accuracy && location.coords.accuracy > 100) {
-              setErrorMsg('Location accuracy is too low. Please check your GPS settings.');
-              return null;
-            }
+        //     if (location.coords.accuracy && location.coords.accuracy > 100) {
+        //       setErrorMsg('Location accuracy is too low. Please check your GPS settings.');
+        //       return null;
+        //     }
             
-            setLocation(location);
-            return location;
-          } catch (error) {
-            setErrorMsg('Error getting location: ' + error);
-            console.error('Location error:', error);
-            return null;
-          }
-        }
+        //     setCoordinates(location);
+        //     return location;
+        //   } catch (error) {
+        //     setErrorMsg('Error getting location: ' + error);
+        //     console.error('Location error:', error);
+        //     return null;
+        //   }
+        // }
    
      
-    
+        async function getCurrentLocation() {
+            try {
+              console.log('Requesting location permissions...');
+              let { status } = await Location.requestForegroundPermissionsAsync();
+              console.log('Permission status:', status);
+              
+              if (status !== 'granted') {
+                setErrorMsg('Permission to access location was denied');
+                return null;
+              }
+          
+              console.log('Getting current position...');
+              let location = await Location.getCurrentPositionAsync({
+                accuracy: Location.Accuracy.High, // Changed to High accuracy
+                mayShowUserSettingsDialog: true
+              });
+              
+              console.log('Location received:', location);
+              
+              if (location.coords.accuracy && location.coords.accuracy > 100) {
+                setErrorMsg('Location accuracy is too low. Please check your GPS settings.');
+                return null;
+              }
+              
+              setCoordinates(location);
+              return location;
+            } catch (error) {
+              console.error('Detailed location error:', error);
+              setErrorMsg('Error getting location: ' + error);
+              return null;
+            }
+          }
 
 
     //   let lat = 0;
@@ -140,35 +171,46 @@ export default function MarkAttendance() {
         }
 
         try {
-           const response = await axios.put('https://api-stage.feelaxo.com/api/attendance/status', {
-              staff_id: userData?.id,
-              lat: currentLocation.coords.latitude,
-              long: currentLocation.coords.longitude,
-             });
-             console.log(response.data.time);
-            if (response.data.time === 'out'){
-                Toast.show({
-                    type: 'Error',
-                    text1: 'Location',
-                    text2: 'You are not in the office',
-                    position: 'top',
-                    visibilityTime: 3000,
-                })
-                return
+            const response = await axios.put('https://api-stage.feelaxo.com/api/attendance/status', {
+                staff_id: userData?.id,
+                lat: currentLocation.coords.latitude,
+                long: currentLocation.coords.longitude,
+            });
+
+            // Handle time object response
+            if (typeof response.data.time === 'object') {
+                // Get the last entry from the time object
+                const timeEntries = Object.entries(response.data.time);
+                const lastEntry = timeEntries[timeEntries.length - 1];
+                const [lastTime, status] = lastEntry;
+
+                if (status === 'out') {
+                    Toast.show({
+                        type: 'error',
+                        text1: 'Location',
+                        text2: 'You are not in the office',
+                        position: 'top',
+                        visibilityTime: 3000,
+                    });
+                    return;
+                }
+
+                setCheckInTime(lastTime);
+            } else {
+                // Handle single time string response
+                setCheckInTime(response.data.time);
             }
+
             setIsTracking(true);
-          
-            setCheckInTime(response.data.time);
             setCheckedIn(true);
-       
-           
+
             Toast.show({
                 type: 'success',
-               text1: 'Check In',
-               text2: response.data.message,
-              position: 'top',
+                text1: 'Check In',
+                text2: response.data.message,
+                position: 'top',
                 visibilityTime: 3000,
-          });
+            });
         } catch (error: any) {
             console.error('CheckIn error:', error.response?.data || error.message);
             Toast.show({
@@ -331,7 +373,9 @@ export default function MarkAttendance() {
                                 className="bg-gray-700 py-4 rounded-xl mb-4"
                                 disabled={true}
                             >
-                                <Text className="text-white text-center font-semibold">Check in time {checkInTime}</Text>
+                                <Text className="text-white text-center font-semibold">
+                                    Check in time: {typeof checkInTime === 'string' ? checkInTime : JSON.stringify(checkInTime)}
+                                </Text>
                             </TouchableOpacity>
                         ) : (
                             <TouchableOpacity 

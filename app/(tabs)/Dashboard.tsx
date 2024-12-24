@@ -204,7 +204,7 @@ function UpcomingAppointments(){
           <Text className="text-2xl font-bold text-gray-800">Upcoming Appointments</Text>
         </View>
 
-        {appointments.length === 0 ? (  // Check if there are no appointments
+        {!appointments || appointments.length === 0 ? (  // Modified this line to check for undefined
           <View className="flex-1 justify-center items-center">
             <Text className="text-lg text-gray-600">No upcoming appointments</Text>
           </View>
@@ -215,7 +215,7 @@ function UpcomingAppointments(){
               onPress={() => handleAppointmentPress(appointment)}
             >
               <View className="bg-white rounded-xl mb-4 shadow-sm border border-black">
-                <View className="flex-row justify-between items-center p-4 border-b border-gray-100">
+                <View className="flex-row justify-between items-center p-4  border-gray-100">
                   <Text className="text-base font-bold text-gray-800">
                     {appointment.order_id}
                   </Text>
