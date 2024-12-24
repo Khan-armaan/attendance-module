@@ -213,8 +213,13 @@ export default function Sales() {
 }
 
 function WeeklySales() {
+  const { userData } = useUser();
   const [salesData, setSalesData] = useState<ApiResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [modalVisible, setModalVisible] = useState(false);
+
+
+  const [selectedSale, setSelectedSale] = useState<SelectedSale | null>(null);
 
   useEffect(() => {
     fetchSalesData();
@@ -222,7 +227,7 @@ function WeeklySales() {
 
   const fetchSalesData = async () => {
     try {
-      const response = await fetch('https://api-stage.feelaxo.com/api/staff/completed-orders?staff_id=738');
+      const response = await fetch(`https://api-stage.feelaxo.com/api/staff/completed-orders?staff_id=${userData?.id}`);
       const data = await response.json();
       setSalesData(data);
     } catch (error) {
@@ -321,6 +326,95 @@ function WeeklySales() {
           );
         })}
       </View>
+
+
+      {/* Sales List with Pressable */}
+      <View className="gap-4">
+        {weeklySales.map((sale) => {
+          const date = new Date(sale.appointmentDate);
+          return (
+            <Pressable 
+              key={sale.appointment_id}
+              onPress={() => {
+                setSelectedSale(sale);
+                setModalVisible(true);
+              }}
+            >
+              <View className="border border-black rounded-lg p-4 flex-row justify-between items-center mb-4">
+                <View className="flex-col">
+                  <Text className="font-bold">
+                    {date.toLocaleDateString('en-US', { 
+                      day: '2-digit',
+                      month: 'short',
+                      year: 'numeric'
+                    })}
+                  </Text>
+                  <Text className="text-gray-500">
+                    {sale.appointmentTime.substring(0, 5)}
+                  </Text>
+                </View>
+                <View className="flex-row items-center gap-8">
+                  <Text className="text-gray-500">
+                    {parseFloat(sale.cartTotal).toFixed(2)}
+                  </Text>
+                  <Text className="font-bold">
+                    {parseFloat(sale.commission).toFixed(2)}
+                  </Text>
+                </View>
+              </View>
+            </Pressable>
+          );
+        })}
+      </View>
+
+
+          {/* Detail Modal */}
+          <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View className="flex-1 justify-center items-center bg-black/50">
+          <View className="bg-white p-4 rounded-lg w-[90%]">
+            {selectedSale && (
+              <>
+                <View className="flex-row justify-between items-center mb-4">
+                  <Text className="text-xl font-bold">
+                    {new Date(selectedSale.appointmentDate).toLocaleDateString('en-US', {
+                      day: '2-digit',
+                      month: 'short',
+                      year: 'numeric'
+                    })}, {selectedSale.appointmentTime.substring(0, 5)}
+                  </Text>
+                  <Text className="text-xl font-bold">{parseFloat(selectedSale.cartTotal).toFixed(2)}</Text>
+                </View>
+
+                <View className="mb-4">
+                  <Text className="font-bold">{selectedSale.user_name || 'Customer'}, {selectedSale.user_phone}</Text>
+                </View>
+
+                {selectedSale.itemsSelected.map((item, index) => (
+                  <View key={index} className="flex-row justify-between mb-2">
+                    <View>
+                      <Text className="font-bold">{item.service_type_name}</Text>
+                      <Text className="text-gray-500">{item.duration}</Text>
+                    </View>
+                    <Text>{item.service_price}</Text>
+                  </View>
+                ))}
+
+                <Pressable
+                  onPress={() => setModalVisible(false)}
+                  className="bg-gray-200 p-3 rounded-lg mt-4"
+                >
+                  <Text className="text-center">Close</Text>
+                </Pressable>
+              </>
+            )}
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
