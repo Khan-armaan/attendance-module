@@ -203,7 +203,7 @@ export default function MarkAttendance() {
                long: currentLocation.coords.longitude,
              
         });
-        console.log(response.data.time);
+      
             
             setIsTracking(false);
             setCheckedOut(true);

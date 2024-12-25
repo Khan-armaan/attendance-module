@@ -123,36 +123,49 @@ export default function AttendanceCalendar() {
   }, []);
 
   return (
-    <View className="flex-1 justify-center items-center bg-white p-4">
-      <View className="w-11/12 max-w-xl shadow-xl rounded-xl border-2 border-black">
-        <Calendar
-          onDayPress={handleDayPress}
-          markedDates={{
-            ...markedDates,
-            [selectedDate]: { 
-              ...markedDates[selectedDate],
-              selected: true,
-              selectedColor: '#2563eb'
+    <View className="flex-1 bg-white">
+      <Calendar
+        onDayPress={handleDayPress}
+        markedDates={{
+          ...markedDates,
+          [selectedDate]: { 
+            ...markedDates[selectedDate],
+            selected: true,
+            selectedColor: '#3b82f6'
+          }
+        }}
+        theme={{
+          backgroundColor: '#ffffff',
+          calendarBackground: '#ffffff',
+          textSectionTitleColor: '#000000',
+          selectedDayBackgroundColor: '#FF6B6B',
+          selectedDayTextColor: '#ffffff',
+          todayTextColor: '#000000',
+          dayTextColor: '#000000',
+          textDisabledColor: '#d9d9d9',
+          monthTextColor: '#000000',
+          textMonthFontSize: 24,
+          textMonthFontWeight: 'bold',
+          textDayFontSize: 16,
+          textDayHeaderFontSize: 12,
+          textDayFontWeight: '400',
+          textDayHeaderFontWeight: '400',
+          stylesheet: {
+            calendar: {
+              header: {
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                paddingLeft: 10,
+                paddingRight: 10,
+                marginTop: 8,
+                alignItems: 'center',
+              }
             }
-          }}
-          theme={{
-            backgroundColor: '#ffffff',
-            calendarBackground: '#ffffff',
-            textSectionTitleColor: '#2563eb',
-            selectedDayBackgroundColor: '#2563eb',
-            selectedDayTextColor: '#ffffff',
-            todayTextColor: '#2563eb',
-            dayTextColor: '#2d3748',
-            textDisabledColor: '#9ca3af',
-            monthTextColor: '#1f2937',
-            textMonthFontSize: 18,
-            textMonthFontWeight: 'bold',
-            textDayFontSize: 16,
-            textDayHeaderFontSize: 14,
-            textDayHeaderFontWeight: 'bold',
-          }}
-        />
-      </View>
+          },
+          arrowColor: '#000000',
+        }}
+        enableSwipeMonths={true}
+      />
 
       <Modal
         transparent={true}
