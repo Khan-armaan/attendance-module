@@ -293,41 +293,6 @@ function WeeklySales() {
         </View>
       </View>
 
-      {/* Sales List */}
-      <View className="gap-4">
-        {weeklySales.map((sale) => {
-          const date = new Date(sale.appointmentDate);
-          return (
-            <View 
-              key={sale.appointment_id}
-              className="border border-black rounded-lg p-4 flex-row justify-between items-center mb-4"
-            >
-              <View className="flex-col">
-                <Text className="font-bold">
-                  {date.toLocaleDateString('en-US', { 
-                    day: '2-digit',
-                    month: 'short',
-                    year: 'numeric'
-                  })}
-                </Text>
-                <Text className="text-gray-500">
-                  {sale.appointmentTime.substring(0, 5)}
-                </Text>
-              </View>
-              <View className="flex-row items-center gap-8">
-                <Text className="text-gray-500">
-                  {parseFloat(sale.cartTotal).toFixed(2)}
-                </Text>
-                <Text className="font-bold">
-                  {parseFloat(sale.commission).toFixed(2)}
-                </Text>
-              </View>
-            </View>
-          );
-        })}
-      </View>
-
-
       {/* Sales List with Pressable */}
       <View className="gap-4">
         {weeklySales.map((sale) => {
@@ -367,9 +332,8 @@ function WeeklySales() {
         })}
       </View>
 
-
-          {/* Detail Modal */}
-          <Modal
+      {/* Detail Modal */}
+      <Modal
         animationType="slide"
         transparent={true}
         visible={modalVisible}

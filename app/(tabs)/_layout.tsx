@@ -1,15 +1,15 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Link, router, Tabs } from 'expo-router';
 import { View, Image, TouchableOpacity, Text } from 'react-native';
-import { useEffect, useState } from 'react';
+import {  useState } from 'react';
 import { useUser } from '../../contexts/UserContext';
-import axios from 'axios';
+
 
 
 export default function TabLayout() {
   const [showMenu, setShowMenu] = useState(false);
   const { userData } = useUser();
-  const [changed, setchanged] = useState(false)
+
 
 
 

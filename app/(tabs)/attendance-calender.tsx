@@ -48,12 +48,6 @@ const calculateDuration = (checkIn: string, checkOut: string): string => {
   }
 };
 
-// Add this type for time entries
-interface TimeEntry {
-  time: string;
-  status: 'in' | 'out';
-}
-
 export default function AttendanceCalendar() {
 
   // state variables  
