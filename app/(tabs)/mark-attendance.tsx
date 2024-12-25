@@ -21,57 +21,25 @@ export default function MarkAttendance() {
     const [lastApiUpdate, setLastApiUpdate] = useState<Date | null>(null);
     
     const { userData } = useUser();  // to get the user information
-    
-   
-// function to fetch the location 
-        // async function getCurrentLocation() {
-        //   try {
-        //     let { status } = await Location.requestForegroundPermissionsAsync();
-        //     if (status !== 'granted') {
-        //       setErrorMsg('Permission to access location was denied');
-        //       return null;
-        //     }
-    
-        //     let location = await Location.getCurrentPositionAsync({
-        //       accuracy: Location.Accuracy.Balanced,
-        //       timeInterval: 10000,
-        //       distanceInterval: 10,
-        //       mayShowUserSettingsDialog: true
-        //     });
-            
-        //     if (location.coords.accuracy && location.coords.accuracy > 100) {
-        //       setErrorMsg('Location accuracy is too low. Please check your GPS settings.');
-        //       return null;
-        //     }
-            
-        //     setCoordinates(location);
-        //     return location;
-        //   } catch (error) {
-        //     setErrorMsg('Error getting location: ' + error);
-        //     console.error('Location error:', error);
-        //     return null;
-        //   }
-        // }
-   
-     
+
         async function getCurrentLocation() {
             try {
-              console.log('Requesting location permissions...');
+           
               let { status } = await Location.requestForegroundPermissionsAsync();
-              console.log('Permission status:', status);
+          
               
               if (status !== 'granted') {
                 setErrorMsg('Permission to access location was denied');
                 return null;
               }
           
-              console.log('Getting current position...');
+           
               let location = await Location.getCurrentPositionAsync({
                 accuracy: Location.Accuracy.High, // Changed to High accuracy
                 mayShowUserSettingsDialog: true
               });
               
-              console.log('Location received:', location);
+           
               
               if (location.coords.accuracy && location.coords.accuracy > 100) {
                 setErrorMsg('Location accuracy is too low. Please check your GPS settings.');
@@ -86,30 +54,6 @@ export default function MarkAttendance() {
               return null;
             }
           }
-
-
-    //   let lat = 0;
-    //   let long = 0;
-
-    //   let text = 'Waiting...';    
-    //   if (errorMsg) {
-    //     text = errorMsg;
-    //   } else if (location) {
-    //     text = JSON.stringify(location);
-    //     lat = location.coords.latitude;
-    //     long = location.coords.longitude;
-    //   } 
-   
-
-
-      
-
-
-
-
-
-
-
 
 
 
