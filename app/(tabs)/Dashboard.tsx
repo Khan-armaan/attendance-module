@@ -94,6 +94,10 @@ if (!userData?.id){
 
 function UpcomingAppointments(){
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
@@ -106,19 +110,37 @@ function UpcomingAppointments(){
 
 
   useEffect(() => {
-    fetchAppointments();
+    fetchAppointments(1);
     fetchCompletedAppointments()
   }, [completed]);
 
-  const fetchAppointments = async () => {
+  const fetchAppointments = async (page: number) => {
     try {
-      const response = await fetch(`https://api-stage.feelaxo.com/api/staff/appointments?staff_id=${userData?.id}`);
-      const json = await response.json();  // converting the response to json format
-      setAppointments(json.data);  // setting the appointments 
+      setIsLoadingMore(true);
+      const response = await fetch(
+        `https://api-stage.feelaxo.com/api/staff/appointments?staff_id=${userData?.id}&page=${page}&limit=10`
+      );
+      const json = await response.json();
+      
+      if (page === 1) {
+        setAppointments(json.data);
+      } else {
+        setAppointments(prev => [...prev, ...json.data]);
+      }
+      
+      setTotalPages(json.meta.total_pages);
+      setCurrentPage(json.meta.current_page);
     } catch (error) {
       console.error('Error fetching appointments:', error);
     } finally {
       setLoading(false);
+      setIsLoadingMore(false);
+    }
+  };
+
+  const loadMore = () => {
+    if (currentPage < totalPages && !isLoadingMore) {
+      fetchAppointments(currentPage + 1);
     }
   };
 
@@ -168,7 +190,7 @@ function UpcomingAppointments(){
     position: 'top',
       visibilityTime: 3000,
 });
-       await fetchAppointments(); // Refresh appointments after update
+       await fetchAppointments(1); // Refresh appointments after update
        setTimeout(() => {
         setNotificationModal(false);
       }, 2000);
@@ -184,7 +206,7 @@ function UpcomingAppointments(){
     position: 'top',
       visibilityTime: 3000,
 }); 
-    await fetchAppointments()
+    await fetchAppointments(1)
 
         setTimeout(() => {
           setNotificationModal(false);
@@ -280,6 +302,18 @@ function UpcomingAppointments(){
             </TouchableOpacity>
           ))
         )}
+ {/* Add Load More button at the bottom */}
+ {currentPage < totalPages && (
+        <TouchableOpacity 
+          onPress={loadMore}
+          className="bg-blue-500 rounded px-4 py-2 mt-4 mb-14"
+          disabled={isLoadingMore}
+        >
+          <Text className="text-white text-center">
+            {isLoadingMore ? 'Loading...' : 'Load More'}
+          </Text>
+        </TouchableOpacity>
+      )}
 
       
       </ScrollView>
@@ -357,33 +391,49 @@ function UpcomingAppointments(){
 
 function  CompletedAppointments(){
   
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  
+  const [completedAppointments, setCompletedAppointments] = useState<CompletedAppointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const { userData } = useUser();
-  const [completedAppointments, setCompletedAppointments] = useState<CompletedAppointment[]>([]);
   const [notificationModal, setNotificationModal] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState('');
   const [refresh, setRefresh] = useState(false)
 
   useEffect(() => {
-   
-    fetchCompletedAppointments();
+    fetchCompletedAppointments(1);
   }, []);
 
-
-
-  const fetchCompletedAppointments = async () => {
+  const fetchCompletedAppointments = async (page: number) => {
     try {
+      setIsLoadingMore(true);
+      const response = await axios.get(
+        `https://api-stage.feelaxo.com/api/staff/completed-orders?staff_id=${userData?.id}&page=${page}&limit=10`
+      );
       
-      const response = await axios.get(`https://api-stage.feelaxo.com/api/staff/completed-orders?staff_id=${userData?.id}`);
-     console.log(response.data)
-      setCompletedAppointments(response.data.data);
-    
-      setLoading(false)
-
+      if (page === 1) {
+        setCompletedAppointments(response.data.data);
+      } else {
+        setCompletedAppointments(prev => [...prev, ...response.data.data]);
+      }
+      
+      setTotalPages(response.data.meta.total_pages);
+      setCurrentPage(response.data.meta.current_page);
+      setLoading(false);
     } catch (error) {
       console.error('Error fetching completed appointments:', error);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
+
+  const loadMore = () => {
+    if (currentPage < totalPages && !isLoadingMore) {
+      fetchCompletedAppointments(currentPage + 1);
     }
   };
 
@@ -413,7 +463,7 @@ function  CompletedAppointments(){
     //   alert("appointment status updated successfully")
        setNotificationMessage('Appointment status updated successfully');
       setNotificationModal(true);
-     await fetchCompletedAppointments()
+     await fetchCompletedAppointments(1)
        setTimeout(() => {
         setNotificationModal(false);
       }, 2000);
@@ -422,7 +472,7 @@ function  CompletedAppointments(){
    //    alert('appointment status not updated')
        setNotificationMessage('Failed to update the status of the appointment');
       setNotificationModal(true);
-       await fetchCompletedAppointments()
+       await fetchCompletedAppointments(1)
 
         setTimeout(() => {
           setNotificationModal(false);
@@ -453,8 +503,7 @@ function  CompletedAppointments(){
         <View className="mb-6 mt-8 flex-row justify-between items-center">
           <Text className="text-2xl font-bold text-gray-800">Completed Appointments</Text>
           <TouchableOpacity 
-        
-            onPress={() =>  fetchCompletedAppointments()}
+            onPress={() => fetchCompletedAppointments(1)}
             className="bg-blue-500 px-4 py-2 rounded-lg flex-row items-center"
           >
             <Icon name="refresh" size={16} color="white" className="mr-2" />
@@ -540,6 +589,18 @@ function  CompletedAppointments(){
               </View>
             </TouchableOpacity>
           ))
+        )}
+
+        {currentPage < totalPages && (
+          <TouchableOpacity 
+            onPress={loadMore}
+            className="bg-blue-500 rounded px-4 py-2 mt-4 mb-4"
+            disabled={isLoadingMore}
+          >
+            <Text className="text-white text-center">
+              {isLoadingMore ? 'Loading...' : 'Load More'}
+            </Text>
+          </TouchableOpacity>
         )}
       </ScrollView>
 
