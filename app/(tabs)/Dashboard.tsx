@@ -594,7 +594,7 @@ function  CompletedAppointments(){
         {currentPage < totalPages && (
           <TouchableOpacity 
             onPress={loadMore}
-            className="bg-blue-500 rounded px-4 py-2 mt-4 mb-4"
+            className="bg-blue-500 rounded px-4 py-2 mt-4 mb-14"
             disabled={isLoadingMore}
           >
             <Text className="text-white text-center">
