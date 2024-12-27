@@ -122,7 +122,7 @@ export default function MarkAttendance() {
             });
 
             // Handle time object response
-            if (typeof response.data.time === 'object') {
+            if (typeof response.data.time === 'object')  {
                 // Get the last entry from the time object
                 const timeEntries = Object.entries(response.data.time);
                 const lastEntry = timeEntries[timeEntries.length - 1];
