@@ -1,16 +1,26 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Text } from "react-native";
 import { View, TouchableOpacity, Image, ScrollView,  } from "react-native";
-import { Link, router, Stack } from 'expo-router';
+import { Link, router } from 'expo-router';
 import { useUser } from '../contexts/UserContext';  // Adjust the import path as needed
 import { useState } from 'react';
 import { FontAwesome } from '@expo/vector-icons';
 import { BackHandler } from 'react-native';
+import axios from 'axios';
 
+interface BusinessData {
+    business_name: string;
+    business_type: string;
+    state_name: string;
+    city_name: string;
+    area: string;
+    address: string;
+}
 
 export default function Profile() {
     const { userData, setUserData } = useUser();
     const [showMenu, setShowMenu] = useState(false);
+    const [businessData, setBusinessData] = useState<BusinessData | null>(null);
 
     const handleLogout = async () => {
         try {
@@ -34,6 +44,13 @@ export default function Profile() {
 
         return () => backHandler.remove();
     }, []);
+    useEffect(() =>{
+        fetchBusinessData();
+    },[])
+   async function fetchBusinessData(){
+   const response =await axios.get(`https://api-stage.feelaxo.com/api/staff/business-details?staff_id=738`)
+    setBusinessData(response.data)
+}
 
     return (
         <View className="flex-1 bg-gray-50">
@@ -95,24 +112,28 @@ export default function Profile() {
                     </View>
                 </View>
 
-                {/* Contact Information */}
-                <View className="bg-blue-50 p-8 mb-6 rounded-lg border border-blue-100 shadow-sm">
-                    <Text className="text-lg font-semibold mb-4 text-blue-900">Contact Information</Text>
+
+                <View className="bg-purple-50 p-8 mb-6 rounded-lg border border-purple-100 shadow-sm">
+                    <Text className="text-lg font-semibold mb-4 text-purple-900">Business Details</Text>
                     <View className="space-y-3">
-                        <View className="flex-row items-center">
-                            <FontAwesome name="envelope" size={16} color="#3B82F6" />
-                            <Text className="ml-3 text-gray-700">{userData?.email}</Text>
+                        <View className="flex-row justify-between">
+                            <Text className="text-gray-700">Business Name</Text>
+                            <Text className="font-medium text-purple-800">{businessData?.business_name || 'Zen Sanctuary Spa'}</Text>
                         </View>
-                        <View className="flex-row items-center">
-                            <FontAwesome name="phone" size={16} color="#3B82F6" />
-                            <Text className="ml-3 text-gray-700">{userData?.phone}</Text>
+                        <View className="flex-row justify-between">
+                            <Text className="text-gray-700">Business Type</Text>
+                            <Text className="font-medium text-purple-800">{businessData?.business_type || 'Spa'}</Text>
                         </View>
-                        <View className="flex-row items-center">
-                            <FontAwesome name="map-marker" size={16} color="#3B82F6" />
-                            <Text className="ml-3 text-gray-700">{userData?.address || 'Not specified'}</Text>
+                        <View className="space-y-1">
+                            <Text className="text-gray-700">Address</Text>
+                            <Text className="font-medium text-purple-800">
+                                {`${businessData?.address || '123, Lotus Avenue, Near Marine Drive,'}\n${businessData?.area || 'Asvini'},\n${businessData?.city_name || 'Mumbai'}, ${businessData?.state_name || 'Maharashtra'}`}
+                            </Text>
                         </View>
                     </View>
                 </View>
+
+         
 
                 {/* Work Details */}
                 <View className="bg-green-50 p-8 mb-6 rounded-lg border border-green-100 shadow-sm">
@@ -142,6 +163,27 @@ export default function Profile() {
                         </View>
                     </View>
                 </View>
+
+                           {/* Contact Information */}
+                <View className="bg-blue-50 p-8 mb-6 rounded-lg border border-blue-100 shadow-sm">
+                    <Text className="text-lg font-semibold mb-4 text-blue-900">Contact Information</Text>
+                    <View className="space-y-3">
+                        <View className="flex-row items-center">
+                            <FontAwesome name="envelope" size={16} color="#3B82F6" />
+                            <Text className="ml-3 text-gray-700">{userData?.email}</Text>
+                        </View>
+                        <View className="flex-row items-center">
+                            <FontAwesome name="phone" size={16} color="#3B82F6" />
+                            <Text className="ml-3 text-gray-700">{userData?.phone}</Text>
+                        </View>
+                        <View className="flex-row items-center">
+                            <FontAwesome name="map-marker" size={16} color="#3B82F6" />
+                            <Text className="ml-3 text-gray-700">{userData?.address || 'Not specified'}</Text>
+                        </View>
+                    </View>
+                </View>
+             
+
                 <View className="flex-row justify-center">
                 <TouchableOpacity 
                                 className="flex-row items-center px-4 py-2"
