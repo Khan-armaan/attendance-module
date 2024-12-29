@@ -37,7 +37,7 @@ export default function Login() {
 
   const onSubmit: SubmitHandler<FormFields> = async (data) => {
     try {
-      const response = await axios.post('https://api-stage.feelaxo.com/api/staff/login', {
+      const response = await axios.post('https://api.feelaxo.com/api/staff/login', {
         phone: data.number,
         password: data.password
       });

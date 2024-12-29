@@ -66,7 +66,7 @@ export default function AttendanceCalendar() {
       setIsLoading(true);
       const formattedDate = date.split('-').reverse().join('-');
       const response = await axios.get<AttendanceResponse>(
-        `https://api-stage.feelaxo.com/api/attendance/staff/${userData?.id}?date=${formattedDate}`
+        `https://api.feelaxo.com/api/attendance/staff/${userData?.id}?date=${formattedDate}`
       );
      
       setAttendanceData(response.data);
@@ -93,7 +93,7 @@ export default function AttendanceCalendar() {
       const today = new Date();
       const formattedDate = `${today.getDate().toString().padStart(2, '0')}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getFullYear()}`;
       const response = await axios.get<AttendanceResponse>(
-        `https://api-stage.feelaxo.com/api/attendance/staff/${userData?.id}/range?date=${formattedDate}`
+        `https://api.feelaxo.com/api/attendance/staff/${userData?.id}/range?date=${formattedDate}`
       );
       
       const marks: Record<string, any> = {};

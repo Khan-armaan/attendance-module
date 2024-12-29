@@ -48,7 +48,7 @@ export default function Profile() {
         fetchBusinessData();
     },[])
    async function fetchBusinessData(){
-   const response =await axios.get(`https://api-stage.feelaxo.com/api/staff/business-details?staff_id=738`)
+   const response =await axios.get(`https://api.feelaxo.com/api/staff/business-details?staff_id=738`)
     setBusinessData(response.data)
 }
 

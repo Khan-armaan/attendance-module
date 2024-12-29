@@ -83,7 +83,7 @@ if (!userData?.id){
 }
 
   return (
-    <>
+  <>
      <Tab.Navigator>
       <Tab.Screen name="Upcoming" component={UpcomingAppointments} />
       <Tab.Screen name="Completed" component={CompletedAppointments} />
@@ -171,7 +171,7 @@ function UpcomingAppointments(){
   const handleCompleteAppointment = async () => {
     if (selectedAppointment) {
       try {
-        const response = await axios.put('https://api-stage.feelaxo.com/api/staff/appointment/update', {
+        const response = await axios.put('https://api.feelaxo.com/api/staff/appointment/update', {
           appointment_id: selectedAppointment.appointment_id,
           status: 'completed',
         });
@@ -412,7 +412,7 @@ function  CompletedAppointments(){
     try {
       setIsLoadingMore(true);
       const response = await axios.get(
-        `https://api-stage.feelaxo.com/api/staff/completed-orders?staff_id=${userData?.id}&page=${page}&limit=10`
+        `https://api.feelaxo.com/api/staff/completed-orders?staff_id=${userData?.id}&page=${page}&limit=10`
       );
       
       if (page === 1) {
@@ -453,7 +453,7 @@ function  CompletedAppointments(){
   const handleCompleteAppointment = async () => {
     if (selectedAppointment) {
       try {
-        const response = await axios.put('https://api-stage.feelaxo.com/api/staff/appointment/update', {
+        const response = await axios.put('https://api.feelaxo.com/api/staff/appointment/update', {
           appointment_id: selectedAppointment.appointment_id,
           status: 'completed',
         });

@@ -115,7 +115,7 @@ export default function MarkAttendance() {
         }
 
         try {
-            const response = await axios.put('https://api-stage.feelaxo.com/api/attendance/status', {
+            const response = await axios.put('https://api.feelaxo.com/api/attendance/status', {
                 staff_id: userData?.id,
                 lat: currentLocation.coords.latitude,
                 long: currentLocation.coords.longitude,
@@ -197,7 +197,7 @@ export default function MarkAttendance() {
               }
 
         try {
-            const response = await axios.put('https://api-stage.feelaxo.com/api/attendance/status', {
+            const response = await axios.put('https://api.feelaxo.com/api/attendance/status', {
                staff_id: userData?.id,
                lat: currentLocation.coords.latitude,
                long: currentLocation.coords.longitude,
@@ -242,7 +242,7 @@ export default function MarkAttendance() {
                     const currentLocation = await getCurrentLocation();
                     if (currentLocation && userData?.id) {
                         try {
-                            await axios.put('https://api-stage.feelaxo.com/api/attendance/status', {
+                            await axios.put('https://api.feelaxo.com/api/attendance/status', {
                                 staff_id: userData.id,
                                 lat: currentLocation.coords.latitude,
                                 long: currentLocation.coords.longitude,
