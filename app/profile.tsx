@@ -184,17 +184,17 @@ export default function Profile() {
                 </View>
              
 
-                <View className="flex-row justify-center">
-                <TouchableOpacity 
-                                className="flex-row items-center px-4 py-2"
-                                onPress={() => {
-                                    handleLogout();
-                                    setShowMenu(false);
-                                }}
-                            >
-                                <FontAwesome name="sign-out" size={16} color="red" className="mr-2" />
-                                <Text className="ml-2 text-red-500">Logout</Text>
-                            </TouchableOpacity>
+                <View className="flex-row justify-center mb-20">
+                    <TouchableOpacity 
+                        className="flex-row items-center px-4"
+                        onPress={() => {
+                            handleLogout();
+                            setShowMenu(false);
+                        }}
+                    >
+                        <FontAwesome name="sign-out" size={16} color="red" className="mr-2" />
+                        <Text className="ml-2 text-red-500">Logout</Text>
+                    </TouchableOpacity>
                 </View>
             </ScrollView>
         </View>
