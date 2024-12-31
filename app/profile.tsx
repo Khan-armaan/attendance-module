@@ -17,6 +17,8 @@ interface BusinessData {
     address: string;
 }
 
+
+
 export default function Profile() {
     const { userData, setUserData } = useUser();
     const [showMenu, setShowMenu] = useState(false);
@@ -48,7 +50,7 @@ export default function Profile() {
         fetchBusinessData();
     },[])
    async function fetchBusinessData(){
-   const response =await axios.get(`https://api.feelaxo.com/api/staff/business-details?staff_id=738`)
+   const response =await axios.get(`https://api.feelaxo.com/api/staff/business-details?staff_id=${userData?.id}`)
     setBusinessData(response.data)
 }
 
