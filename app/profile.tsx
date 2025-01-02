@@ -199,6 +199,6 @@ export default function Profile() {
                     </TouchableOpacity>
                 </View>
             </ScrollView>
-        </View>
+        </View> 
     );
 }
