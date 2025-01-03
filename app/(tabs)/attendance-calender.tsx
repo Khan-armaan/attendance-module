@@ -132,8 +132,15 @@ export default function AttendanceCalendar() {
             ...markedDates[selectedDate],
             selected: true,
             selectedColor: '#3b82f6'
+          },
+          [new Date().toISOString().split('T')[0]]: {
+            selected: true,
+            selectedColor: '#3b82f6'
           }
         }}
+        maxDate={new Date().toISOString().split('T')[0]}
+        hideExtraDays={true}
+        disableAllTouchEventsForDisabledDays={true}
         theme={{
           backgroundColor: '#ffffff',
           calendarBackground: '#ffffff',

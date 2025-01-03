@@ -9,7 +9,7 @@ import { BackHandler } from 'react-native';
 import axios from 'axios';
 
 interface BusinessData {
-    business_name: string;
+    name: string;
     business_type: string;
     state_name: string;
     city_name: string;
@@ -52,6 +52,7 @@ export default function Profile() {
    async function fetchBusinessData(){
    const response =await axios.get(`https://api.feelaxo.com/api/staff/business-details?staff_id=${userData?.id}`)
     setBusinessData(response.data)
+    console.log(businessData)
 }
 
     return (
@@ -120,11 +121,11 @@ export default function Profile() {
                     <View className="space-y-3">
                         <View className="flex-row justify-between">
                             <Text className="text-gray-700">Business Name</Text>
-                            <Text className="font-medium text-purple-800">{businessData?.business_name || 'Zen Sanctuary Spa'}</Text>
+                            <Text className="font-medium text-purple-800">{businessData?.name }</Text>
                         </View>
                         <View className="flex-row justify-between">
                             <Text className="text-gray-700">Business Type</Text>
-                            <Text className="font-medium text-purple-800">{businessData?.business_type || 'Spa'}</Text>
+                            <Text className="font-medium text-purple-800">{businessData?.business_type}</Text>
                         </View>
                         <View className="space-y-1">
                             <Text className="text-gray-700">Address</Text>
