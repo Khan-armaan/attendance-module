@@ -86,7 +86,7 @@ if (!userData?.id){
   <>
      <Tab.Navigator>
       <Tab.Screen name="Upcoming Appointments" component={UpcomingAppointments} />
-   {/*  <Tab.Screen name="Completed" component={CompletedAppointments} /> */}  
+     <Tab.Screen name="Completed" component={CompletedAppointments} />
     </Tab.Navigator>
    </>
   );
@@ -111,7 +111,7 @@ function UpcomingAppointments(){
 
   useEffect(() => {
     fetchAppointments(1);
-//    fetchCompletedAppointments()
+   fetchCompletedAppointments()
   }, [completed]);
 
   const fetchAppointments = async (page: number) => {
@@ -167,14 +167,14 @@ function UpcomingAppointments(){
     }
   };
 
-  // const fetchCompletedAppointments = async () => {
-  //   try {
-  //     const response = await axios.get(`https://api-stage.feelaxo.com/api/staff/completed-orders?staff_id=${userData?.id}`);
+  const fetchCompletedAppointments = async () => {
+    try {
+      const response = await axios.get(`https://api-stage.feelaxo.com/api/staff/completed-orders?staff_id=${userData?.id}`);
      
-  //   } catch (error) {
-  //     console.error('Error fetching completed appointments:', error);
-  //   }
-  // };
+    } catch (error) {
+      console.error('Error fetching completed appointments:', error);
+    }
+  };
 
  
 
@@ -412,282 +412,282 @@ function UpcomingAppointments(){
 
 
 
-                // function  CompletedAppointments(){
+                function  CompletedAppointments(){
                   
-                //   const [currentPage, setCurrentPage] = useState(1);
-                //   const [totalPages, setTotalPages] = useState(1);
-                //   const [isLoadingMore, setIsLoadingMore] = useState(false);
+                  const [currentPage, setCurrentPage] = useState(1);
+                  const [totalPages, setTotalPages] = useState(1);
+                  const [isLoadingMore, setIsLoadingMore] = useState(false);
                   
-                //   const [completedAppointments, setCompletedAppointments] = useState<CompletedAppointment[]>([]);
-                //   const [loading, setLoading] = useState(true);
-                //   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
-                //   const [modalVisible, setModalVisible] = useState(false);
-                //   const { userData } = useUser();
-                //   const [notificationModal, setNotificationModal] = useState(false);
-                //   const [notificationMessage, setNotificationMessage] = useState('');
-                //   const [refresh, setRefresh] = useState(false)
+                  const [completedAppointments, setCompletedAppointments] = useState<CompletedAppointment[]>([]);
+                  const [loading, setLoading] = useState(true);
+                  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+                  const [modalVisible, setModalVisible] = useState(false);
+                  const { userData } = useUser();
+                  const [notificationModal, setNotificationModal] = useState(false);
+                  const [notificationMessage, setNotificationMessage] = useState('');
+                  const [refresh, setRefresh] = useState(false)
 
-                //   useEffect(() => {
-                //     fetchCompletedAppointments(1);
-                //   }, []);
+                  useEffect(() => {
+                    fetchCompletedAppointments(1);
+                  }, []);
 
-                //   const fetchCompletedAppointments = async (page: number) => {
-                //     try {
-                //       setIsLoadingMore(true);
-                //       const response = await axios.get(
-                //         `https://api.feelaxo.com/api/staff/completed-orders?staff_id=${userData?.id}&page=${page}&limit=10`
-                //       );
+                  const fetchCompletedAppointments = async (page: number) => {
+                    try {
+                      setIsLoadingMore(true);
+                      const response = await axios.get(
+                        `https://api.feelaxo.com/api/staff/completed-orders?staff_id=${userData?.id}&page=${page}&limit=10`
+                      );
                       
-                //       if (page === 1) {
-                //         setCompletedAppointments(response.data.data);
-                //       } else {
-                //         setCompletedAppointments(prev => [...prev, ...response.data.data]);
-                //       }
+                      if (page === 1) {
+                        setCompletedAppointments(response.data.data);
+                      } else {
+                        setCompletedAppointments(prev => [...prev, ...response.data.data]);
+                      }
                       
-                //       setTotalPages(response.data.meta.total_pages);
-                //       setCurrentPage(response.data.meta.current_page);
-                //       setLoading(false);
-                //     } catch (error) {
-                //       console.error('Error fetching completed appointments:', error);
-                //     } finally {
-                //       setIsLoadingMore(false);
-                //     }
-                //   };
+                      setTotalPages(response.data.meta.total_pages);
+                      setCurrentPage(response.data.meta.current_page);
+                      setLoading(false);
+                    } catch (error) {
+                      console.error('Error fetching completed appointments:', error);
+                    } finally {
+                      setIsLoadingMore(false);
+                    }
+                  };
 
-                //   const loadMore = () => {
-                //     if (currentPage < totalPages && !isLoadingMore) {
-                //       fetchCompletedAppointments(currentPage + 1);
-                //     }
-                //   };
+                  const loadMore = () => {
+                    if (currentPage < totalPages && !isLoadingMore) {
+                      fetchCompletedAppointments(currentPage + 1);
+                    }
+                  };
 
-                //   const formatDate = (dateString: string) => {
-                //     return new Date(dateString).toLocaleDateString();
-                //   };
+                  const formatDate = (dateString: string) => {
+                    return new Date(dateString).toLocaleDateString();
+                  };
 
-                //   const formatTime = (timeString: string) => {
-                //     return timeString.substring(0, 5);
-                //   };
+                  const formatTime = (timeString: string) => {
+                    return timeString.substring(0, 5);
+                  };
 
-                //   const handleAppointmentPress = (appointment: Appointment) => {
-                //     setSelectedAppointment(appointment);
-                //     setModalVisible(true);
-                //   };
+                  const handleAppointmentPress = (appointment: Appointment) => {
+                    setSelectedAppointment(appointment);
+                    setModalVisible(true);
+                  };
 
-                //   const handleCompleteAppointment = async () => {
-                //     if (selectedAppointment) {
-                //       try {
-                //         const response = await axios.put('https://api.feelaxo.com/api/staff/appointment/update', {
-                //           appointment_id: selectedAppointment.appointment_id,
-                //           status: 'completed',
-                //         });
+                  const handleCompleteAppointment = async () => {
+                    if (selectedAppointment) {
+                      try {
+                        const response = await axios.put('https://api.feelaxo.com/api/staff/appointment/update', {
+                          appointment_id: selectedAppointment.appointment_id,
+                          status: 'completed',
+                        });
                     
-                //       if (response.status ) {
-                //         setModalVisible(false)
-                //     //   alert("appointment status updated successfully")
-                //       setNotificationMessage('Appointment status updated successfully');
-                //       setNotificationModal(true);
-                //     await fetchCompletedAppointments(1)
-                //       setTimeout(() => {
-                //         setNotificationModal(false);
-                //       }, 2000);
+                      if (response.status ) {
+                        setModalVisible(false)
+                    //   alert("appointment status updated successfully")
+                      setNotificationMessage('Appointment status updated successfully');
+                      setNotificationModal(true);
+                    await fetchCompletedAppointments(1)
+                      setTimeout(() => {
+                        setNotificationModal(false);
+                      }, 2000);
                       
-                //       } else {
-                //   //    alert('appointment status not updated')
-                //       setNotificationMessage('Failed to update the status of the appointment');
-                //       setNotificationModal(true);
-                //       await fetchCompletedAppointments(1)
+                      } else {
+                  //    alert('appointment status not updated')
+                      setNotificationMessage('Failed to update the status of the appointment');
+                      setNotificationModal(true);
+                      await fetchCompletedAppointments(1)
 
-                //         setTimeout(() => {
-                //           setNotificationModal(false);
-                //         }, 2000);
-                //       }
-                //       } catch (error) {
-                //         setNotificationMessage('Failed to update the status of the appointment')
-                //         setNotificationModal(true);
-                //         console.error('Error updating appointment:', error);
+                        setTimeout(() => {
+                          setNotificationModal(false);
+                        }, 2000);
+                      }
+                      } catch (error) {
+                        setNotificationMessage('Failed to update the status of the appointment')
+                        setNotificationModal(true);
+                        console.error('Error updating appointment:', error);
                     
-                //       }
-                //     }
-                //   };
+                      }
+                    }
+                  };
 
-                //   if (loading) {
-                //     return (
-                //       <View className="flex-1 justify-center items-center">
-                //         <ActivityIndicator size="large" color="#0066cc" />
-                //       </View>
-                //     );
-                //   }
+                  if (loading) {
+                    return (
+                      <View className="flex-1 justify-center items-center">
+                        <ActivityIndicator size="large" color="#0066cc" />
+                      </View>
+                    );
+                  }
 
 
-                //   return<>
-                //   <ScrollView className="flex-1 bg-gray-50 px-4 py-6">
+                  return<>
+                  <ScrollView className="flex-1 bg-gray-50 px-4 py-6">
                       
 
-                //         <View className="mb-6 mt-8 flex-row justify-between items-center">
-                //           <Text className="text-2xl font-bold text-gray-800">Completed Appointments</Text>
-                //           <TouchableOpacity 
-                //             onPress={() => fetchCompletedAppointments(1)}
-                //             className="bg-blue-500 px-4 py-2 rounded-lg flex-row items-center"
-                //           >
-                //             <Icon name="refresh" size={16} color="white" className="mr-2" />
-                //             <Text className="text-white font-medium">Refresh</Text>
-                //           </TouchableOpacity>
-                //         </View>
+                        <View className="mb-6 mt-8 flex-row justify-between items-center">
+                          <Text className="text-2xl font-bold text-gray-800">Completed Appointments</Text>
+                          <TouchableOpacity 
+                            onPress={() => fetchCompletedAppointments(1)}
+                            className="bg-blue-500 px-4 py-2 rounded-lg flex-row items-center"
+                          >
+                            <Icon name="refresh" size={16} color="white" className="mr-2" />
+                            <Text className="text-white font-medium">Refresh</Text>
+                          </TouchableOpacity>
+                        </View>
 
-                //         {completedAppointments.length === 0 ? (
-                //           <View className="flex-1 justify-center items-center">
-                //             <Text className="text-lg text-gray-600">No completed appointments</Text>
-                //           </View>
-                //         ) : (
-                //           completedAppointments.map((appointment) => (
-                //             <TouchableOpacity 
-                //               key={appointment.appointment_id} 
-                //               onPress={() => handleAppointmentPress(appointment)}
-                //             >
-                //               <View className="bg-white rounded-xl mb-4 shadow-sm border border-black">
-                //                 <View className="flex-row justify-between items-center p-4 border-b border-gray-100">
-                //                   <Text className="text-base font-bold text-gray-800">
-                //                     {appointment.order_id}
-                //                   </Text>
-                //                   <View className={`px-3 py-1 rounded-full border border-black ${
-                //                     appointment.status === 'completed' 
-                //                       ? 'bg-green-100' 
-                //                       : 'bg-red-100'
-                //                   }`}>
-                //                     <Text className={`text-xs capitalize ${
-                //                       appointment.status === 'completed'
-                //                         ? 'text-green-800'
-                //                         : 'text-red-800'
-                //                     }`}>
-                //                       {appointment.status}
-                //                     </Text>
-                //                   </View>
-                //                 </View>
+                        {completedAppointments.length === 0 ? (
+                          <View className="flex-1 justify-center items-center">
+                            <Text className="text-lg text-gray-600">No completed appointments</Text>
+                          </View>
+                        ) : (
+                          completedAppointments.map((appointment) => (
+                            <TouchableOpacity 
+                              key={appointment.appointment_id} 
+                              onPress={() => handleAppointmentPress(appointment)}
+                            >
+                              <View className="bg-white rounded-xl mb-4 shadow-sm border border-black">
+                                <View className="flex-row justify-between items-center p-4 border-b border-gray-100">
+                                  <Text className="text-base font-bold text-gray-800">
+                                    {appointment.order_id}
+                                  </Text>
+                                  <View className={`px-3 py-1 rounded-full border border-black ${
+                                    appointment.status === 'completed' 
+                                      ? 'bg-green-100' 
+                                      : 'bg-red-100'
+                                  }`}>
+                                    <Text className={`text-xs capitalize ${
+                                      appointment.status === 'completed'
+                                        ? 'text-green-800'
+                                        : 'text-red-800'
+                                    }`}>
+                                      {appointment.status}
+                                    </Text>
+                                  </View>
+                                </View>
 
-                //                 <View className="p-4">
-                //                   <View className="space-y-2">
-                //                     <View className="flex-row items-center">
-                //                       <Icon name="user" size={16} className="text-gray-500" />
-                //                       <Text className="ml-2 text-gray-600">
-                //                         {appointment.user_name}
-                //                       </Text>
-                //                     </View>
+                                <View className="p-4">
+                                  <View className="space-y-2">
+                                    <View className="flex-row items-center">
+                                      <Icon name="user" size={16} className="text-gray-500" />
+                                      <Text className="ml-2 text-gray-600">
+                                        {appointment.user_name}
+                                      </Text>
+                                    </View>
 
-                //                     <View className="flex-row items-center">
-                //                       <Icon name="phone" size={16} className="text-gray-500" />
-                //                       <Text className="ml-2 text-gray-600">
-                //                         {appointment.user_phone}
-                //                       </Text>
-                //                     </View>
+                                    <View className="flex-row items-center">
+                                      <Icon name="phone" size={16} className="text-gray-500" />
+                                      <Text className="ml-2 text-gray-600">
+                                        {appointment.user_phone}
+                                      </Text>
+                                    </View>
 
-                //                     <View className="flex-row items-center">
-                //                       <Icon name="calendar" size={16} className="text-gray-500" />
-                //                       <Text className="ml-2 text-gray-600">
-                //                         {formatDate(appointment.appointmentDate)} at {formatTime(appointment.appointmentTime)}
-                //                       </Text>
-                //                     </View>
-                //                   </View>
+                                    <View className="flex-row items-center">
+                                      <Icon name="calendar" size={16} className="text-gray-500" />
+                                      <Text className="ml-2 text-gray-600">
+                                        {formatDate(appointment.appointmentDate)} at {formatTime(appointment.appointmentTime)}
+                                      </Text>
+                                    </View>
+                                  </View>
 
-                //                   <View className="mt-4">
-                //                     <Text className="text-sm font-bold text-gray-800 mb-2">
-                //                       Services:
-                //                     </Text>
-                //                     {appointment.itemsSelected.map((item, index) => (
-                //                       <Text key={index} className="text-gray-600 ml-2 mb-1">
-                //                         • {item.service_type_name || 'No service selected'}
-                //                         {item.service_price ? ` - ₹${item.service_price}` : ''}
-                //                       </Text>
-                //                     ))}
-                //                   </View>
+                                  <View className="mt-4">
+                                    <Text className="text-sm font-bold text-gray-800 mb-2">
+                                      Services:
+                                    </Text>
+                                    {appointment.itemsSelected.map((item, index) => (
+                                      <Text key={index} className="text-gray-600 ml-2 mb-1">
+                                        • {item.service_type_name || 'No service selected'}
+                                        {item.service_price ? ` - ₹${item.service_price}` : ''}
+                                      </Text>
+                                    ))}
+                                  </View>
 
-                //                   <View className="mt-4 pt-3 border-t border-gray-100">
-                //                     <Text className="text-right text-base font-bold text-gray-800">
-                //                       Total: ₹{appointment.grandTotal}
-                //                     </Text>
-                //                     <Text className="text-right text-sm text-gray-600">
-                //                       Commission: ₹{appointment.commission}
-                //                     </Text>
-                //                   </View>
-                //                 </View>
-                //               </View>
-                //             </TouchableOpacity>
-                //           ))
-                //         )}
+                                  <View className="mt-4 pt-3 border-t border-gray-100">
+                                    <Text className="text-right text-base font-bold text-gray-800">
+                                      Total: ₹{appointment.grandTotal}
+                                    </Text>
+                                    <Text className="text-right text-sm text-gray-600">
+                                      Commission: ₹{appointment.commission}
+                                    </Text>
+                                  </View>
+                                </View>
+                              </View>
+                            </TouchableOpacity>
+                          ))
+                        )}
 
-                //         {currentPage < totalPages && (
-                //           <TouchableOpacity 
-                //             onPress={loadMore}
-                //             className="bg-blue-500 rounded px-4 py-2 mt-4 mb-14"
-                //             disabled={isLoadingMore}
-                //           >
-                //             <Text className="text-white text-center">
-                //               {isLoadingMore ? 'Loading...' : 'Load More'}
-                //             </Text>
-                //           </TouchableOpacity>
-                //         )}
-                //       </ScrollView>
+                        {currentPage < totalPages && (
+                          <TouchableOpacity 
+                            onPress={loadMore}
+                            className="bg-blue-500 rounded px-4 py-2 mt-4 mb-14"
+                            disabled={isLoadingMore}
+                          >
+                            <Text className="text-white text-center">
+                              {isLoadingMore ? 'Loading...' : 'Load More'}
+                            </Text>
+                          </TouchableOpacity>
+                        )}
+                      </ScrollView>
 
-                //       {/* Modal for displaying appointment details */}
-                //       <Modal
-                //         visible={modalVisible}
-                //         transparent={true}
+                      {/* Modal for displaying appointment details */}
+                      <Modal
+                        visible={modalVisible}
+                        transparent={true}
                       
-                //       >
-                //         <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
-                //           <View className="flex-1 justify-center items-center bg-black/50  border border-black">
-                //             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                //               <View className="bg-white rounded-lg p-4 w-11/12 relative">
-                //                 <TouchableOpacity 
-                //                   onPress={() => setModalVisible(false)} 
-                //                   className="absolute top-4 right-4"
-                //                 >
+                      >
+                        <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
+                          <View className="flex-1 justify-center items-center bg-black/50  border border-black">
+                            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                              <View className="bg-white rounded-lg p-4 w-11/12 relative">
+                                <TouchableOpacity 
+                                  onPress={() => setModalVisible(false)} 
+                                  className="absolute top-4 right-4"
+                                >
                                 
-                //                 </TouchableOpacity>
-                //                 {selectedAppointment && (
-                //                   <>
-                //                     <Text className="text-lg font-bold">{selectedAppointment.order_id}</Text>
-                //                     <Text>Date: {formatDate(selectedAppointment.appointmentDate)}</Text>
-                //                     <Text>Time: {formatTime(selectedAppointment.appointmentTime)}</Text>
-                //                     <Text>Name: {selectedAppointment.user_name}</Text>
-                //                     <Text>Phone: {selectedAppointment.user_phone}</Text>
-                //                     <Text>Status: {selectedAppointment.status}</Text>
-                //                     <Text>Total: ₹{selectedAppointment.grandTotal}</Text>
-                //                     <Text>Services:</Text>
-                //                     {selectedAppointment.itemsSelected.map((item, index) => (
-                //                       <Text key={index}>
-                //                         • {item.service_type_name || 'No service selected'} {item.service_price ? `- ₹${item.service_price}` : ''}
-                //                       </Text>
-                //                     ))}
+                                </TouchableOpacity>
+                                {selectedAppointment && (
+                                  <>
+                                    <Text className="text-lg font-bold">{selectedAppointment.order_id}</Text>
+                                    <Text>Date: {formatDate(selectedAppointment.appointmentDate)}</Text>
+                                    <Text>Time: {formatTime(selectedAppointment.appointmentTime)}</Text>
+                                    <Text>Name: {selectedAppointment.user_name}</Text>
+                                    <Text>Phone: {selectedAppointment.user_phone}</Text>
+                                    <Text>Status: {selectedAppointment.status}</Text>
+                                    <Text>Total: ₹{selectedAppointment.grandTotal}</Text>
+                                    <Text>Services:</Text>
+                                    {selectedAppointment.itemsSelected.map((item, index) => (
+                                      <Text key={index}>
+                                        • {item.service_type_name || 'No service selected'} {item.service_price ? `- ₹${item.service_price}` : ''}
+                                      </Text>
+                                    ))}
 
-                //                     {/* Conditionally render the Completed button */}
-                //                     {selectedAppointment.status !== 'completed' && selectedAppointment.status !== 'cancelled'  ? (
-                //                       <TouchableOpacity 
-                //                         onPress={handleCompleteAppointment} 
-                //                         className="bg-blue-500 rounded px-4 py-2 mt-4"
-                //                       >
-                //                         <Text className="text-white text-center">Completed</Text>
-                //                       </TouchableOpacity>
-                //                     ) : (null)}
-                //                   </>
-                //                 )}
-                //               </View>
-                //             </TouchableWithoutFeedback>
-                //           </View>
-                //         </TouchableWithoutFeedback>
-                //       </Modal>
-                //       <Modal 
-                //       visible={notificationModal}
-                //       transparent={true}
+                                    {/* Conditionally render the Completed button */}
+                                    {selectedAppointment.status !== 'completed' && selectedAppointment.status !== 'cancelled'  ? (
+                                      <TouchableOpacity 
+                                        onPress={handleCompleteAppointment} 
+                                        className="bg-blue-500 rounded px-4 py-2 mt-4"
+                                      >
+                                        <Text className="text-white text-center">Completed</Text>
+                                      </TouchableOpacity>
+                                    ) : (null)}
+                                  </>
+                                )}
+                              </View>
+                            </TouchableWithoutFeedback>
+                          </View>
+                        </TouchableWithoutFeedback>
+                      </Modal>
+                      <Modal 
+                      visible={notificationModal}
+                      transparent={true}
                       
-                //       >
-                //         <View className="flex-1 justify-center items-center">
-                //         <View className="bg-black bg-opacity-70 px-6 py-4 rounded-lg">
-                //           <Text className="text-white text-center">
-                //             {notificationMessage}
-                //           </Text>
-                //         </View>
-                //       </View>
-                //       </Modal>
+                      >
+                        <View className="flex-1 justify-center items-center">
+                        <View className="bg-black bg-opacity-70 px-6 py-4 rounded-lg">
+                          <Text className="text-white text-center">
+                            {notificationMessage}
+                          </Text>
+                        </View>
+                      </View>
+                      </Modal>
                     
-                //   </>
-                // }
+                  </>
+                }

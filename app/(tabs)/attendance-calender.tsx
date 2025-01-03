@@ -145,7 +145,7 @@ export default function AttendanceCalendar() {
           backgroundColor: '#ffffff',
           calendarBackground: '#ffffff',
           textSectionTitleColor: '#000000',
-          selectedDayBackgroundColor: '#FF6B6B',
+          selectedDayBackgroundColor: '#6B7280',
           selectedDayTextColor: '#ffffff',
           todayTextColor: '#000000',
           dayTextColor: '#000000',
