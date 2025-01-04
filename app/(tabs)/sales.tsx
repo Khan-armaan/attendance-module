@@ -17,6 +17,7 @@ interface SalesData {
   appointmentTime: string;
   cartTotal: string;
   commission: string;
+  commission_type: 'flat' | 'percentage';
   itemsSelected: ItemSelected[];
 }
 
@@ -63,9 +64,9 @@ export default function Sales() {
 
   const fetchSalesData = async () => {
     try {
-      const response = await fetch(`https://api-stage.feelaxo.com/api/staff/completed-orders?staff_id=${userData?.id}`);
-      
+      const response = await fetch(`https://api.feelaxo.com/api/staff/completed-orders?staff_id=${userData?.id}`);
       const data = await response.json();
+      console.log('API Response:', data);
       setSalesData(data);
     } catch (error) {
       console.error('Error fetching sales data:', error);
@@ -76,8 +77,10 @@ export default function Sales() {
 
   const getCurrentDaySales = () => {
     if (!salesData?.data) return [];
-    const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
-    return salesData.data.filter(sale => sale.appointmentDate.startsWith(today));
+    const today = new Date().toISOString().split('T')[0];
+    const todaySales = salesData.data.filter(sale => sale.appointmentDate.startsWith(today));
+    console.log('Today\'s Sales:', todaySales);
+    return todaySales;
   };
 
   const calculateTotalBusiness = () => {
@@ -87,7 +90,12 @@ export default function Sales() {
 
   const calculateTotalCommission = () => {
     const todaySales = getCurrentDaySales();
-    return todaySales.reduce((total, item) => total + parseFloat(item.commission), 0);
+    const total = todaySales.reduce((total, item) => {
+      console.log('Commission for sale:', item.commission);
+      return total + parseFloat(item.commission || '0');
+    }, 0);
+    console.log('Total Commission:', total);
+    return total;
   };
 
   if (loading) return (
@@ -117,7 +125,6 @@ export default function Sales() {
             <Text className="text-2xl font-bold text-green-600">
               {calculateTotalCommission().toFixed(2)}
             </Text>
-            <Text className="text-xs"> (10%)</Text>
           </View>
         </View>
       </View>
@@ -227,8 +234,9 @@ function WeeklySales() {
 
   const fetchSalesData = async () => {
     try {
-      const response = await fetch(`https://api-stage.feelaxo.com/api/staff/completed-orders?staff_id=${userData?.id}`);
+      const response = await fetch(`https://api.feelaxo.com/api/staff/completed-orders?staff_id=${userData?.id}`);
       const data = await response.json();
+      console.log('API Response:', data);
       setSalesData(data);
     } catch (error) {
       console.error('Error fetching sales data:', error);
@@ -242,13 +250,15 @@ function WeeklySales() {
     
     const today = new Date();
     const startOfWeek = new Date(today);
-    startOfWeek.setDate(today.getDate() - today.getDay()); // Start from Sunday
+    startOfWeek.setDate(today.getDate() - today.getDay());
     startOfWeek.setHours(0, 0, 0, 0);
 
-    return salesData.data.filter(sale => {
+    const weeklySales = salesData.data.filter(sale => {
       const saleDate = new Date(sale.appointmentDate);
       return saleDate >= startOfWeek && saleDate <= today;
     });
+    console.log('Weekly Sales:', weeklySales);
+    return weeklySales;
   };
 
   const calculateTotalBusiness = () => {
@@ -258,7 +268,12 @@ function WeeklySales() {
 
   const calculateTotalCommission = () => {
     const weeklySales = getWeeklySales();
-    return weeklySales.reduce((total, item) => total + parseFloat(item.commission), 0);
+    const total = weeklySales.reduce((total, item) => {
+      console.log('Commission for sale:', item.commission);
+      return total + parseFloat(item.commission || '0');
+    }, 0);
+    console.log('Total Commission:', total);
+    return total;
   };
 
   if (loading) return (
@@ -288,7 +303,6 @@ function WeeklySales() {
             <Text className="text-2xl font-bold text-green-600">
               {calculateTotalCommission().toFixed(2)}
             </Text>
-            <Text className="text-xs"> (10%)</Text>
           </View>
         </View>
       </View>

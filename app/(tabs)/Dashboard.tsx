@@ -85,7 +85,7 @@ if (!userData?.id){
   return (
   <>
      <Tab.Navigator>
-      <Tab.Screen name="Upcoming Appointments" component={UpcomingAppointments} />
+      <Tab.Screen name="Upcoming" component={UpcomingAppointments} />
      <Tab.Screen name="Completed" component={CompletedAppointments} />
     </Tab.Navigator>
    </>
@@ -244,9 +244,16 @@ function UpcomingAppointments(){
     }
   };
   return<>
-    <ScrollView className="flex-1 bg-gray-50 px-4 py-6">
-        <View className="mb-6">
+    <ScrollView className="flex-1 bg-gray-50 px-2 py-6">
+        <View className="mb-6 mt-8 flex-row justify-between items-center px-2">
           <Text className="text-2xl font-bold text-gray-800">Upcoming Appointments</Text>
+          <TouchableOpacity 
+            onPress={() => fetchAppointments(1)}
+            className="bg-blue-500 px-3 py-2 rounded-lg flex-row items-center ml-2"
+          >
+            <Icon name="refresh" size={14} color="white" className="mr-1" />
+            <Text className="text-white font-medium text-sm">Refresh</Text>
+          </TouchableOpacity>
         </View>
 
         {!appointments || appointments.length === 0 ? (  // Modified this line to check for undefined
@@ -366,6 +373,10 @@ function UpcomingAppointments(){
                     <Text>Phone: {selectedAppointment.user_phone}</Text>
                     <Text>Status: {selectedAppointment.status}</Text>
                     <Text>Total: ₹{selectedAppointment.grandTotal}</Text>
+                    {selectedAppointment && 'commission' in selectedAppointment ? (
+                      <Text>Commission: ₹{(selectedAppointment as CompletedAppointment).commission}</Text>
+                    ) : null}
+                    
                     <Text>Services:</Text>
                     {selectedAppointment.itemsSelected.map((item, index) => (
                       <Text key={index}>
@@ -652,12 +663,17 @@ function UpcomingAppointments(){
                                     <Text>Phone: {selectedAppointment.user_phone}</Text>
                                     <Text>Status: {selectedAppointment.status}</Text>
                                     <Text>Total: ₹{selectedAppointment.grandTotal}</Text>
+                                    
                                     <Text>Services:</Text>
                                     {selectedAppointment.itemsSelected.map((item, index) => (
                                       <Text key={index}>
                                         • {item.service_type_name || 'No service selected'} {item.service_price ? `- ₹${item.service_price}` : ''}
                                       </Text>
                                     ))}
+
+                                    {selectedAppointment && 'commission' in selectedAppointment ? (
+                                      <Text>Commission: ₹{(selectedAppointment as CompletedAppointment).commission}</Text>
+                                    ) : null}
 
                                     {/* Conditionally render the Completed button */}
                                     {selectedAppointment.status !== 'completed' && selectedAppointment.status !== 'cancelled'  ? (
