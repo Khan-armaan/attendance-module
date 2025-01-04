@@ -531,7 +531,7 @@ function UpcomingAppointments(){
 
 
                   return<>
-                  <ScrollView className="flex-1 bg-gray-50 px-4 py-6">
+                  <ScrollView className="flex-1 bg-gray-50 px-2 py-6">
                       
 
                         <View className="mb-6 mt-8 flex-row justify-between items-center">
