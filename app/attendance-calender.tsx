@@ -1,8 +1,10 @@
-import { Text, View, Modal, Pressable } from "react-native";
+import { Text, View, Modal, Pressable, TouchableOpacity, Image } from "react-native";
 import { Calendar } from 'react-native-calendars';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useUser } from '../contexts/UserContext';
+import { Link, router } from 'expo-router';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
 // there is the api issue for getting of the chech out time of the response 
 
@@ -57,6 +59,7 @@ export default function AttendanceCalendar() {
   const [attendanceData, setAttendanceData] = useState<AttendanceResponse | null>(null);
   const [markedDates, setMarkedDates] = useState<Record<string, any>>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
  
   const { userData } = useUser();
 
@@ -122,57 +125,121 @@ export default function AttendanceCalendar() {
     fetchAttendanceRange();
   }, []);
 
-  return (
+  // Add logout handler
+  const handleLogout = () => {
+    router.replace('/login');
+  };
+
+  return (  
+
+
+    
     <View className="flex-1 bg-white">
-      <Calendar
-        onDayPress={handleDayPress}
-        markedDates={{
-          ...markedDates,
-          [selectedDate]: { 
-            ...markedDates[selectedDate],
-            selected: true,
-            selectedColor: '#3b82f6'
-          },
-          [new Date().toISOString().split('T')[0]]: {
-            selected: true,
-            selectedColor: '#3b82f6'
-          }
-        }}
-        maxDate={new Date().toISOString().split('T')[0]}
-        hideExtraDays={true}
-        disableAllTouchEventsForDisabledDays={true}
-        theme={{
-          backgroundColor: '#ffffff',
-          calendarBackground: '#ffffff',
-          textSectionTitleColor: '#000000',
-          selectedDayBackgroundColor: '#6B7280',
-          selectedDayTextColor: '#ffffff',
-          todayTextColor: '#000000',
-          dayTextColor: '#000000',
-          textDisabledColor: '#d9d9d9',
-          monthTextColor: '#000000',
-          textMonthFontSize: 24,
-          textMonthFontWeight: 'bold',
-          textDayFontSize: 16,
-          textDayHeaderFontSize: 12,
-          textDayFontWeight: '400',
-          textDayHeaderFontWeight: '400',
-          stylesheet: {
-            calendar: {
-              header: {
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                paddingLeft: 10,
-                paddingRight: 10,
-                marginTop: 8,
-                alignItems: 'center',
-              }
+      {/* Navbar */}
+      <View className="h-20 flex-row justify-between items-center px-4 bg-white shadow-sm">
+        <Link href="/">
+          <Image
+            source={require('../assets/images/icon.jpeg')}
+            className="w-14 h-14 rounded-full"
+            style={{ resizeMode: 'contain' }}
+          />
+        </Link>
+
+        <View>
+          <TouchableOpacity onPress={() => setShowMenu(!showMenu)}>
+            <View className="w-10 h-10 rounded-full bg-gray-200 justify-center items-center">
+              {userData?.profile ? (
+                <Image 
+                  source={{uri: userData.profile}}
+                  className="w-14 h-14 rounded-full"
+                  style={{ resizeMode: 'cover' }}
+                />
+              ) : (
+                <FontAwesome name="user" size={24} color="gray" />
+              )}
+            </View>
+          </TouchableOpacity>
+
+          {showMenu && (
+            <View className="absolute top-12 right-0 bg-white rounded-lg shadow-lg w-40 py-2 z-50">
+              <TouchableOpacity 
+                className="flex-row items-center px-4 py-2 hover:bg-gray-100"
+                onPress={() => {
+                  router.replace('/profile')
+                  setShowMenu(false);
+                }}
+              >
+                <FontAwesome name="cog" size={16} color="gray" className="mr-2" />
+                <Text className="ml-2">Profile</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity 
+                className="flex-row items-center px-4 py-2 hover:bg-gray-100"
+                onPress={() => {
+                  handleLogout();
+                  setShowMenu(false);
+                }}
+              >
+                <FontAwesome name="sign-out" size={16} color="red" className="mr-2" />
+                <Text className="ml-2 text-red-500">Sign Out</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
+      </View>
+
+      {/* Added spacing container */}
+      <View className="mt-6">
+        <Calendar
+          onDayPress={handleDayPress}
+          markedDates={{
+            ...markedDates,
+            [selectedDate]: { 
+              ...markedDates[selectedDate],
+              selected: true,
+              selectedColor: '#3b82f6'
+            },
+            [new Date().toISOString().split('T')[0]]: {
+              selected: true,
+              selectedColor: '#3b82f6'
             }
-          },
-          arrowColor: '#000000',
-        }}
-        enableSwipeMonths={true}
-      />
+          }}
+          maxDate={new Date().toISOString().split('T')[0]}
+          hideExtraDays={true}
+          disableAllTouchEventsForDisabledDays={true}
+          theme={{
+            backgroundColor: '#ffffff',
+            calendarBackground: '#ffffff',
+            textSectionTitleColor: '#000000',
+            selectedDayBackgroundColor: '#6B7280',
+            selectedDayTextColor: '#ffffff',
+            todayTextColor: '#000000',
+            dayTextColor: '#000000',
+            textDisabledColor: '#d9d9d9',
+            monthTextColor: '#000000',
+            textMonthFontSize: 24,
+            textMonthFontWeight: 'bold',
+            textDayFontSize: 16,
+            textDayHeaderFontSize: 12,
+            textDayFontWeight: '400',
+            textDayHeaderFontWeight: '400',
+            stylesheet: {
+              calendar: {
+                header: {
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  paddingLeft: 10,
+                  paddingRight: 10,
+                  marginTop: 8,
+                  alignItems: 'center',
+                }
+              }
+            },
+            arrowColor: '#000000',
+          }}
+          enableSwipeMonths={true}
+        />
+      </View>
 
       <Modal
         transparent={true}

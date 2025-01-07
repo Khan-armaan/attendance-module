@@ -6,9 +6,11 @@ import { useUser } from '../../contexts/UserContext';
 import { useState} from 'react';
 import axios from 'axios';
 
+import { Link, router } from 'expo-router';
 import * as Location from 'expo-location';
 
 export default function MarkAttendance() {
+
     // states variables 
     const [currentTime, setCurrentTime] = useState('');
     const [currentDate, setCurrentDate] = useState('');
@@ -338,6 +340,12 @@ export default function MarkAttendance() {
                         ) : null}
                     </View>
                 </View>
+                
+                <Link href="../attendance-calender" asChild>
+                    <Text className="text-blue-500 text-center font-semibold mt-4">
+                        Show Calendar
+                    </Text>
+                </Link>
             </View>
             <Toast />
         </>
