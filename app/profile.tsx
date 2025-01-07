@@ -56,51 +56,68 @@ export default function Profile() {
 }
 
     return (
-        <View className="flex-1 bg-gray-50">
-            {/**Navbar feelaxo icon  */}
-            <View className="h-20 flex-row justify-between items-center px-6 bg-white">
-                <Link href="/">
-                    <Image
-                        source={require('../assets/images/icon.jpeg')}
-                        className="w-10 h-10"
-                        style={{ resizeMode: 'contain' }}
-                    />
-                </Link>
+        <View className="flex-1 mb-5">
 
-                {/** user icon on the nav bar */} 
-                <View>
-                    <TouchableOpacity onPress={() => setShowMenu(!showMenu)}>
-                        <View className="w-10 h-10 rounded-full bg-gray-200 justify-center items-center">
-                            {userData?.profile ? (
+      {/**Navbar feelaxo icon  */}
+      <View className="h-20 flex-row justify-between items-center px-4 bg-white">
+        <Link href="/">
+          <Image
+            source={require('../assets/images/icon.jpeg')}
+            className="w-14 h-14 rounded-full"
+            style={{ resizeMode: 'contain' }}
+          />
+        </Link>
+
+       {/** user icon on the nav bar */} 
+        <View>
+          <TouchableOpacity onPress={() => setShowMenu(!showMenu)}>
+            <View className="w-10 h-10 rounded-full bg-gray-200 justify-center items-center">
+            {userData?.profile ? (
                                 <Image 
                                     source={{uri: userData.profile}}
-                                    className="w-6 h-6"
-                                    style={{ resizeMode: 'contain' }}
-                                />
-                            ) : (
-                                <FontAwesome name="user" size={24} color="gray" />
-                            )}
-                        </View>
-                    </TouchableOpacity>
-
-                    {showMenu && (
-                        <View className="absolute top-12 right-0 bg-white rounded-lg shadow-lg w-40 py-2 z-50 elevation-3">
-                            <TouchableOpacity 
-                                className="flex-row items-center px-4 py-2"
-                                onPress={() => {
-                                    router.replace('/profile')
-                                    setShowMenu(false);
-                                }}
-                            >
-                                <FontAwesome name="cog" size={16} color="gray" className="mr-2" />
-                                <Text className="ml-2">Profile</Text>
-                            </TouchableOpacity>
-                            
-                           
-                        </View>
-                    )}
-                </View>
+                                    className="w-14 h-14 rounded-full"
+                                    style={{ resizeMode: 'cover' }}
+                                 />
+                                  ) : (
+                                        <FontAwesome name="user" size={24} color="gray" />
+                                            )}
+             
             </View>
+          </TouchableOpacity>
+
+          {showMenu && (
+            <View className="absolute top-12 right-0 bg-white rounded-lg shadow-lg w-40 py-2 z-50">
+              <TouchableOpacity 
+                className="flex-row items-center px-4 py-2 hover:bg-gray-100"
+                onPress={() => {
+                  router.replace('/profile')
+                  setShowMenu(false);
+                }}
+              >
+                <FontAwesome name="cog" size={16} color="gray" className="mr-2" />
+                <Text className="ml-2">Profile</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity 
+                className="flex-row items-center px-4 py-2 hover:bg-gray-100"
+                onPress={() => {
+                  setShowMenu(false);
+                }}
+              >
+                <FontAwesome name="sign-out" size={16} color="red" className="mr-2" />
+                <Text className="ml-2 text-red-500" onPress={() => {
+                                             handleLogout();
+                                             setShowMenu(false);
+                 
+                }}>Sign Out</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
+      </View>
+
+
+
 
             <ScrollView className="flex-1 px-4">
                 {/* Profile Header Section */}

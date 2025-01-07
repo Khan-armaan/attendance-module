@@ -284,18 +284,9 @@ export default function MarkAttendance() {
                             <Icon name="briefcase" size={20} color="#666" />
                             <Text className="text-gray-600 ml-3">Position: {userData?.job_title}</Text>
                         </View>
-                        <View className="flex-row items-center mb-3">
-                            <Icon name="calendar" size={20} color="#666" />
-                            <Text className="text-gray-600 ml-3">Joining Date: {userData?.joining_date}</Text>
-                        </View>
-                        <View className="flex-row items-center mb-3">
-                            <Icon name="phone" size={20} color="#666" />
-                            <Text className="text-gray-600 ml-3">Phone: {userData?.phone}</Text>
-                        </View>
-                        <View className="flex-row items-center mb-3">
-                            <Icon name="map-marker" size={20} color="#666" />
-                            <Text className="text-gray-600 ml-3">Address: {userData?.address}</Text>
-                        </View>
+                        
+                       
+                     
                         <View className="flex-row items-center mb-3">
                             <Icon name="calendar-o" size={20} color="#666" />
                             <Text className="text-gray-600 ml-3">Date: {currentDate}</Text>

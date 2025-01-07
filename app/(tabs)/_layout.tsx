@@ -8,10 +8,17 @@ import { useUser } from '../../contexts/UserContext';
 
 export default function TabLayout() {
   const [showMenu, setShowMenu] = useState(false);
-  const { userData } = useUser();
+  const { userData, setUserData } = useUser();
 
 
-
+  const handleLogout = async () => {
+    try {
+        await setUserData(null); // This will clear the stored data
+        router.replace('/');
+      } catch (error) {
+        console.error('Error logging out:', error);
+      }
+};
 
 
 
@@ -23,7 +30,7 @@ export default function TabLayout() {
         <Link href="/">
           <Image
             source={require('../../assets/images/icon.jpeg')}
-            className="w-10 h-10"
+            className="w-14 h-14 rounded-full"
             style={{ resizeMode: 'contain' }}
           />
         </Link>
@@ -35,8 +42,8 @@ export default function TabLayout() {
             {userData?.profile ? (
                                 <Image 
                                     source={{uri: userData.profile}}
-                                          className="w-6 h-6"
-                                    style={{ resizeMode: 'contain' }}
+                                    className="w-14 h-14 rounded-full"
+                                    style={{ resizeMode: 'cover' }}
                                  />
                                   ) : (
                                         <FontAwesome name="user" size={24} color="gray" />
@@ -55,7 +62,21 @@ export default function TabLayout() {
                 }}
               >
                 <FontAwesome name="cog" size={16} color="gray" className="mr-2" />
-                <Text className="ml-2">User Profile</Text>
+                <Text className="ml-2">Profile</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity 
+                className="flex-row items-center px-4 py-2 hover:bg-gray-100"
+                onPress={() => {
+                  setShowMenu(false);
+                }}
+              >
+                <FontAwesome name="sign-out" size={16} color="red" className="mr-2" />
+                <Text className="ml-2 text-red-500" onPress={() => {
+                                             handleLogout();
+                                             setShowMenu(false);
+                 
+                }}>Sign Out</Text>
               </TouchableOpacity>
             </View>
           )}

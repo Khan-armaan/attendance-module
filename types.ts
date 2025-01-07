@@ -22,8 +22,7 @@ export default interface UserData {
   dob: string | null;
   commission: string;
   job_title: string;
-  joining_date: string;
-  end_date: string | null;
+  joining_date: string;  end_date: string | null;
   role: string;
   address: string;
   salary: string;
