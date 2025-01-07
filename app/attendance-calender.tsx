@@ -2,7 +2,7 @@ import { Text, View, Modal, Pressable } from "react-native";
 import { Calendar } from 'react-native-calendars';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useUser } from '../../contexts/UserContext';
+import { useUser } from '../contexts/UserContext';
 
 // there is the api issue for getting of the chech out time of the response 
 

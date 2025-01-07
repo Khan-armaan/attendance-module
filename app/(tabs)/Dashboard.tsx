@@ -390,7 +390,7 @@ function UpcomingAppointments(){
                         onPress={handleCompleteAppointment} 
                         className="bg-blue-500 rounded px-4 py-2 mt-4"
                       >
-                        <Text className="text-white text-center">Completed</Text>
+                        <Text className="text-white text-center">Complete</Text>
                       </TouchableOpacity>
                     ) : (null)}
                   </>
