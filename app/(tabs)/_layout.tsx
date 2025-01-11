@@ -13,7 +13,7 @@ export default function TabLayout() {
 
   const handleLogout = async () => {
     try {
-        await setUserData(null); // This will clear the stored data
+        await setUserData(null); 
         router.replace('/');
       } catch (error) {
         console.error('Error logging out:', error);
