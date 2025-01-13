@@ -12,11 +12,11 @@ export default function SplashScreen() {
   }, []);
 
   return (
-    <View className=" bg-[#F47373]">
+    <View className="flex-1 bg-[#F47373]">
       <Image 
-        source={require('../assets/images/splash.png')}
-        style={{ width: '95%', height: '95%',  }}
-        
+        source={require('../assets/images/splash.jpeg')}
+        style={{ width: '100%', height: '100%', alignSelf: 'center' }}
+        resizeMode="cover"
       />
     </View>
   );

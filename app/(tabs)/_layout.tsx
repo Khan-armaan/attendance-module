@@ -111,7 +111,15 @@ export default function TabLayout() {
             tabBarIcon: ({ color }) => <FontAwesome size={28} name="line-chart" color={color} />,
           }}
         />
+         <Tabs.Screen
+          name="profile"
+          options={{
+            title: 'profile',
+            tabBarIcon: ({ color }) => <FontAwesome size={28} name="user" color={color} />,
+          }}
+        />
       </Tabs>
+      
 
         
         
