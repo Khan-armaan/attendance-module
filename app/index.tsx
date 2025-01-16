@@ -1,22 +1,27 @@
-import { View, Image } from "react-native";
+import { View } from "react-native";
+import { Video } from 'expo-av';
 import { useEffect } from "react";
 import { router } from 'expo-router';
 
 export default function SplashScreen() {
   useEffect(() => {
-    const timer = setTimeout(() => {
-      router.replace('/login');
-    }, 500); // 1 second delay
-
-    return () => clearTimeout(timer);
+    // Remove the timer-based navigation
   }, []);
 
   return (
     <View className="flex-1 bg-[#F47373]">
-      <Image 
-        source={require('../assets/images/splash.jpeg')}
-        style={{ width: '100%', height: '100%', alignSelf: 'center' }}
+      <Video
+        source={require('../assets/images/splash.mp4')}
+        style={{ width: '100%', height: '100%' }}
         resizeMode="cover"
+        shouldPlay={true}
+        isLooping={false}
+        isMuted={true}
+        onPlaybackStatusUpdate={(status) => {
+          if (status.isLoaded && status.didJustFinish) {
+            router.replace('/login');
+          }
+        }}
       />
     </View>
   );
