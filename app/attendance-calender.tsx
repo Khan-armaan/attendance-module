@@ -136,8 +136,8 @@ export default function AttendanceCalendar() {
     
     <View className="flex-1 bg-white">
       {/* Navbar */}
-      <View className="h-20 flex-row justify-between items-center px-4 bg-white shadow-sm">
-        <Link href="/">
+      <View className="h-20 flex-row justify-between items-center px-4 bg-white shadow-sm mb-10">
+        <Link href="/(tabs)/Dashboard">
           <Image
             source={require('../assets/images/icon.jpeg')}
             className="w-14 h-14 rounded-full"
