@@ -183,7 +183,11 @@ function UpcomingAppointments(){
   };
 
   const formatTime = (timeString: string) => {
-    return timeString.substring(0, 5);
+    const [hours, minutes] = timeString.split(':');
+    const hour = parseInt(hours);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const formattedHour = hour % 12 || 12; // Convert 0 to 12 for 12 AM
+    return `${formattedHour}:${minutes} ${ampm}`;
   };
 
   const handleAppointmentPress = (appointment: Appointment) => {
@@ -476,7 +480,11 @@ function UpcomingAppointments(){
                   };
 
                   const formatTime = (timeString: string) => {
-                    return timeString.substring(0, 5);
+                    const [hours, minutes] = timeString.split(':');
+                    const hour = parseInt(hours);
+                    const ampm = hour >= 12 ? 'PM' : 'AM';
+                    const formattedHour = hour % 12 || 12; // Convert 0 to 12 for 12 AM
+                    return `${formattedHour}:${minutes} ${ampm}`;
                   };
 
                   const handleAppointmentPress = (appointment: Appointment) => {
