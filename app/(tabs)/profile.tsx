@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Text } from "react-native";
 import { View, TouchableOpacity, Image, ScrollView,  } from "react-native";
-import { Link, router } from 'expo-router';
+import {  router } from 'expo-router';
 import { useUser } from '../../contexts/UserContext';  // Adjust the import path as needed
 import { useState } from 'react';
 import { FontAwesome } from '@expo/vector-icons';
