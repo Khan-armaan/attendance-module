@@ -21,6 +21,12 @@ export default function MarkAttendance() {
     const [checkedIn, setCheckedIn] = useState(false)
     const [checkedOut, setCheckedOut] = useState(false)
     const [lastApiUpdate, setLastApiUpdate] = useState<Date | null>(null);
+    const [attendanceData, setAttendanceData] = useState<any>(null);
+    const [upcomingAppointments, setUpcomingAppointments] = useState(0);
+    const [completedAppointments, setCompletedAppointments] = useState(0);
+    const [walkInAppointments, setWalkInAppointments] = useState(0);
+    const [todaySales, setTodaySales] = useState(0);
+    const [todayCommission, setTodayCommission] = useState(0);
     
     const { userData } = useUser();  // to get the user information
 
@@ -264,83 +270,257 @@ export default function MarkAttendance() {
             }
         };
     }, [checkedIn, checkedOut, userData?.id, lastApiUpdate]);
+   
 
+    // Add this new function to fetch attendance data
+    const fetchAttendanceData = async () => {
+        try {
+            const currentDate = new Date().toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+            const response = await axios.get(`https://api.feelaxo.com/api/attendance/staff/${userData?.id}?date=${currentDate}`);
+            setAttendanceData(response.data);
+            
+            // Update check-in/out times if attendance data exists
+            if (response.data.attendance && response.data.attendance.length > 0) {
+                const timeEntries = Object.entries(response.data.attendance[0].time);
+                if (timeEntries.length > 0) {
+                    // First check-in
+                    const firstEntry = timeEntries[0];
+                    if (firstEntry[1] === 'in') {
+                        setCheckInTime(firstEntry[0]);
+                        setCheckedIn(true);
+                    }
+                    
+                    // Last check-out
+                    const lastEntry = timeEntries[timeEntries.length - 1];
+                    if (lastEntry[1] === 'out') {
+                        setCheckedOut(true);
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching attendance:', error);
+        }
+    };
+
+    // Add this useEffect to fetch attendance data when component mounts
+    useEffect(() => {
+        if (userData?.id) {
+            fetchAttendanceData();
+        }
+    }, [userData?.id]);
+
+    // Add this new function to fetch appointments
+    const fetchAppointments = async () => {
+        try {
+            const response = await axios.get(`https://api.feelaxo.com/api/staff/appointments?staff_id=${userData?.id}`);
+            // Count appointments that are not cancelled and have future dates
+            const count = response.data.data.filter(appointment => {
+                const appointmentDate = new Date(`${appointment.appointmentDate.split('T')[0]} ${appointment.appointmentTime}`);
+                return appointment.status !== 'cancelled' && appointmentDate > new Date();
+            }).length;
+            setUpcomingAppointments(count);
+        } catch (error) {
+            console.error('Error fetching appointments:', error);
+        }
+    };
+
+    // Add this useEffect to fetch appointments when component mounts
+    useEffect(() => {
+        if (userData?.id) {
+            fetchAppointments();
+        }
+    }, [userData?.id]);
+
+    // Add this new function to fetch completed orders
+    const fetchCompletedOrders = async () => {
+        try {
+            const response = await axios.get(`https://api.feelaxo.com/api/staff/completed-orders?staff_id=${userData?.id}&page=1&limit=10`);
+            const today = new Date().toISOString().split('T')[0];
+            
+            let dailySales = 0;
+            let dailyCommission = 0;
+            
+            // Filter and calculate totals for completed POS appointments
+            const todayCompletedOrders = response.data.data.filter(appointment => {
+                const appointmentDate = appointment.appointmentDate.split('T')[0];
+                return appointmentDate === today && appointment.status === 'completed';
+            });
+
+            todayCompletedOrders.forEach(order => {
+                dailySales += parseFloat(order.grandTotal);
+                dailyCommission += parseFloat(order.commission || 0);
+            });
+
+            setCompletedAppointments(todayCompletedOrders.length);
+            
+            // Update the running totals
+            setTodaySales(prev => prev + dailySales);
+            setTodayCommission(prev => prev + dailyCommission);
+        } catch (error) {
+            console.error('Error fetching completed orders:', error);
+        }
+    };
+
+    // Add this useEffect to fetch completed orders when component mounts
+    useEffect(() => {
+        if (userData?.id) {
+            fetchCompletedOrders();
+        }
+    }, [userData?.id]);
+
+    // Add this new function to fetch walk-in appointments
+    const fetchWalkInAppointments = async () => {
+        try {
+            const response = await axios.get(`https://api.feelaxo.com/api/staff/walk-in?staff_id=${userData?.id}`);
+            const today = new Date().toISOString().split('T')[0];
+            
+            let dailySales = 0;
+            let dailyCommission = 0;
+
+            // Filter and calculate totals for walk-in appointments
+            const todayWalkIns = response.data.data.filter(appointment => {
+                const appointmentDate = appointment.delivery_date.split('T')[0];
+                return appointmentDate === today && appointment.status === 'completed';
+            });
+
+            todayWalkIns.forEach(order => {
+                dailySales += parseFloat(order.gross_total);
+                dailyCommission += parseFloat(order.commission || 0);
+            });
+
+            setWalkInAppointments(todayWalkIns.length);
+            
+            // Update the running totals
+            setTodaySales(prev => prev + dailySales);
+            setTodayCommission(prev => prev + dailyCommission);
+        } catch (error) {
+            console.error('Error fetching walk-in appointments:', error);
+        }
+    };
+
+    // Add this useEffect to fetch walk-in appointments when component mounts
+    useEffect(() => {
+        if (userData?.id) {
+            fetchWalkInAppointments();
+        }
+    }, [userData?.id]);
 
     return (
         <>
-            <View className="flex-1 bg-gray-100 p-4 justify-center">
-                <View className="bg-white rounded-3xl p-8 shadow-md my-8 border-2 border-black">
-                   
-                    <View className="items-center mb-8">
-                       
-                        <Text className="text-2xl font-bold mt-4">{userData?.name}</Text>
+            <View className="flex-1 bg-gray-100 p-4">
+                {/* Welcome Header */}
+                <View className="bg-white rounded-xl p-4 shadow-md">
+                    <Text className="text-xl font-bold">Welcome {userData?.name}!</Text>
+                    <Text className="text-gray-600 text-sm">Last login: {currentTime} {currentDate}</Text>
+                </View>
+
+                {/* Stats Grid */}
+                <View className="flex-row justify-between mt-4 gap-4">
+                    <View className="flex-1 bg-white rounded-xl p-4 shadow-md">
+                        <Text className="text-gray-600">Today Sales</Text>
+                        <Text className="text-lg font-bold">₹{todaySales.toFixed(2)}</Text>
+                    </View>
+                    <View className="flex-1 bg-white rounded-xl p-4 shadow-md">
+                        <Text className="text-gray-600">Today Commission</Text>
+                        <Text className="text-lg font-bold">₹{todayCommission.toFixed(2)}</Text>
+                    </View>
+                </View>
+
+                <View className="flex-row justify-between mt-4 gap-4">
+                    <View className="flex-1 bg-white rounded-xl p-4 shadow-md">
+                        <Text className="text-gray-600">Appointments</Text>
+                        <Text className="text-lg font-bold">Upcoming: {upcomingAppointments}</Text>
+                    </View>
+                    <View className="flex-1 bg-white rounded-xl p-4 shadow-md">
+                        <Text className="text-gray-600">Service Completed</Text>
+                        <View className="flex-row justify-between">
+                            <Text className="font-bold">Walk-in: {walkInAppointments}</Text>
+                            <Text className="font-bold">POS: {completedAppointments}</Text>
+                        </View>
+                    </View>
+                </View>
+
+                {/* Attendance Box */}
+                <View className="bg-white rounded-xl p-4 shadow-md mt-4">
+                    <Text className="text-lg font-bold mb-2">Today Attendance</Text>
+                    <View className="flex-row justify-between mb-4">
+                        <View>
+                            <Text className="text-gray-600">Check-in:</Text>
+                            <Text className="font-bold">{checkInTime || '--:--'}</Text>
+                        </View>
+                        <View>
+                            <Text className="text-gray-600">Check-out:</Text>
+                            <Text className="font-bold">
+                                {attendanceData?.attendance?.[0]?.time && 
+                                 Object.entries(attendanceData.attendance[0].time)
+                                    .filter(([_, status]) => status === 'out')
+                                    .pop()?.[0] || '--:--'}
+                            </Text>
+                        </View>
                     </View>
 
-                    
-                    <View className="space-y-4">
-                        <View className="flex-row items-center mb-3">
+                    {/* Staff Information */}
+                    <View className="space-y-7">
+                        <View className="flex-row items-center">
                             <Icon name="id-badge" size={20} color="#666" />
                             <Text className="text-gray-600 ml-3">Staff ID: {userData?.id}</Text>
                         </View>
-                        <View className="flex-row items-center mb-3">
+                        <View className="flex-row items-center mt-2 ">
                             <Icon name="briefcase" size={20} color="#666" />
                             <Text className="text-gray-600 ml-3">Position: {userData?.job_title}</Text>
                         </View>
-                        
-                       
-                     
-                        <View className="flex-row items-center mb-3">
-                            <Icon name="calendar-o" size={20} color="#666" />
+                        <View className="flex-row items-center mt-2 ">
+                            <Icon name="calendar" size={20} color="#666" />
                             <Text className="text-gray-600 ml-3">Date: {currentDate}</Text>
                         </View>
-                        <View className="flex-row items-center mb-3">
+                        <View className="flex-row items-center mt-2">
                             <Icon name="clock-o" size={20} color="#666" />
                             <Text className="text-gray-600 ml-3">Time: {currentTime}</Text>
-                          
                         </View>
-                      
-                    </View>
-
-                
-                    <View className="mt-8">
-                        <Text className="text-center font-bold text-lg mb-6">TODAY'S ATTENDANCE STATUS</Text>
-
-                        {checkedIn ? (
-                            <TouchableOpacity 
-                                className="bg-gray-700 py-4 rounded-xl mb-4"
-                                disabled={true}
-                            >
-                                <Text className="text-white text-center font-semibold">
-                                    Check in time: {typeof checkInTime === 'string' ? checkInTime : JSON.stringify(checkInTime)}
-                                </Text>
-                            </TouchableOpacity>
-                        ) : (
-                            <TouchableOpacity 
-                                className="bg-[#2C3E50] py-4 rounded-xl mb-4"
-                                onPress={checkIn}
-                            >
-                                <Text className="text-white text-center font-semibold">Check in</Text>
-                            </TouchableOpacity>
-                        )}
-
-                        {checkedIn && !checkedOut ? (
-                            <TouchableOpacity 
-                                className="bg-gray-700 py-3 rounded-xl"
-                                onPress={checkOut}
-                            >
-                                <Text className="text-white text-center font-semibold">Check Out</Text>
-                            </TouchableOpacity>
-                        ) : checkedIn && checkedOut ? (
-                            <TouchableOpacity 
-                                className="bg-gray-700 py-3 rounded-xl"
-                                disabled={true}
-                            >
-                                <Text className="text-white text-center font-semibold">Checked Out</Text>
-                            </TouchableOpacity>
-                        ) : null}
                     </View>
                 </View>
-                
+
+                {/* Check In/Out Buttons */}
+                <View className="mt-8">
+                    {checkedIn ? (
+                        <TouchableOpacity 
+                            className="bg-gray-700 py-4 rounded-xl mb-4"
+                            disabled={true}
+                        >
+                            <Text className="text-white text-center font-semibold">
+                                Check in time: {typeof checkInTime === 'string' ? checkInTime : JSON.stringify(checkInTime)}
+                            </Text>
+                        </TouchableOpacity>
+                    ) : (
+                        <TouchableOpacity 
+                            className="bg-[#2C3E50] py-4 rounded-xl mb-4"
+                            onPress={checkIn}
+                        >
+                            <Text className="text-white text-center font-semibold">Check in</Text>
+                        </TouchableOpacity>
+                    )}
+
+                    {checkedIn && !checkedOut ? (
+                        <TouchableOpacity 
+                            className="bg-gray-700 py-3  rounded-xl"
+                            onPress={checkOut}
+                        >
+                            <Text className="text-white text-center font-semibold">Check Out</Text>
+                        </TouchableOpacity>
+                    ) : checkedIn && checkedOut ? (
+                        <TouchableOpacity 
+                            className="bg-gray-700 py-3 rounded-xl"
+                            disabled={true}
+                        >
+                            <Text className="text-white text-center font-semibold">Checked Out</Text>
+                        </TouchableOpacity>
+                    ) : null}
+                </View>
+
                 <Link href="../attendance-calender" asChild>
                     <Text className="text-blue-500 text-center font-semibold mt-4">
                         Show Calendar

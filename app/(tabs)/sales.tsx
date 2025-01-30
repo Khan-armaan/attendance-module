@@ -38,6 +38,35 @@ interface SelectedSale extends SalesData {
 }
 
 
+interface WalkInAppointment {
+  id: number;
+  user_id: number | null;
+  order_id: string;
+  admin_id: number;
+  sub_total: number;
+  gross_total: number;
+  discount: number;
+  paid_amount: number;
+  balance_amount: number;
+  order_type: number;
+  payment_type: number;
+  notes: string | null;
+  delivery_date: string;
+  status: string;
+  data: string;
+  created_at: string;
+  updated_at: string;
+  staff_id: number;
+  delivery_time: string;
+  gst_percentage: number;
+  gst_value: number;
+  bookedFrom: string;
+  commission: string;
+  commission_type: string;
+}
+
+
+
 const Tab = createMaterialTopTabNavigator();
 export default function Sales() {
     return(

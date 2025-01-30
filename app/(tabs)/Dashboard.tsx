@@ -69,6 +69,33 @@ interface CompletedAppointment {
   commission: string;
 }
 
+interface WalkInAppointment {
+  id: number;
+  user_id: number | null;
+  order_id: string;
+  admin_id: number;
+  sub_total: number;
+  gross_total: number;
+  discount: number;
+  paid_amount: number;
+  balance_amount: number;
+  order_type: number;
+  payment_type: number;
+  notes: string | null;
+  delivery_date: string;
+  status: string;
+  data: string;
+  created_at: string;
+  updated_at: string;
+  staff_id: number;
+  delivery_time: string;
+  gst_percentage: number;
+  gst_value: number;
+  bookedFrom: string;
+  commission: string;
+  commission_type: string;
+}
+
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { Redirect } from "expo-router";
 
@@ -87,6 +114,7 @@ if (!userData?.id){
      <Tab.Navigator>
       <Tab.Screen name="Upcoming" component={UpcomingAppointments} />
      <Tab.Screen name="Completed" component={CompletedAppointments} />
+     <Tab.Screen name="Walk In" component={WalkInAppointments} />
     </Tab.Navigator>
    </>
   );
@@ -422,11 +450,6 @@ function UpcomingAppointments(){
   
 }
 
-
-
-
-
-
                 function  CompletedAppointments(){
                   
                   const [currentPage, setCurrentPage] = useState(1);
@@ -538,7 +561,7 @@ function UpcomingAppointments(){
                   }
 
 
-                  return<>
+                  return <>
                   <ScrollView className="flex-1 bg-gray-50 px-2 py-6">
                       
 
@@ -715,3 +738,202 @@ function UpcomingAppointments(){
                     
                   </>
                 }
+ 
+function WalkInAppointments() {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [walkInAppointments, setWalkInAppointments] = useState<WalkInAppointment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedAppointment, setSelectedAppointment] = useState<WalkInAppointment | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const { userData } = useUser();
+
+  useEffect(() => {
+    fetchWalkInAppointments(1);
+  }, []);
+
+  const fetchWalkInAppointments = async (page: number) => {
+    try {
+      setIsLoadingMore(true);
+      const response = await axios.get(
+        `https://api.feelaxo.com/api/staff/walk-in`, {
+          params: {
+            staff_id: 6194,
+            page: page,
+            limit: 10
+          }
+        }
+      );
+      
+      if (response.data && response.data.data) {
+        if (page === 1) {
+          setWalkInAppointments(response.data.data);
+        } else {
+          setWalkInAppointments(prev => [...prev, ...response.data.data]);
+        }
+        
+        setTotalPages(response.data.meta.total_pages);
+        setCurrentPage(response.data.meta.current_page);
+      }
+    } catch (error) {
+      console.error('Error fetching walk-in appointments:', error);
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Failed to fetch walk-in appointments',
+        position: 'top',
+        visibilityTime: 3000,
+      });
+    } finally {
+      setLoading(false);
+      setIsLoadingMore(false);
+    }
+  };
+
+  const loadMore = () => {
+    if (currentPage < totalPages && !isLoadingMore) {
+      fetchWalkInAppointments(currentPage + 1);
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString();
+  };
+
+  const formatTime = (timeString: string) => {
+    const [hours, minutes] = timeString.split(' ')[1].split(':');
+    const hour = parseInt(hours);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const formattedHour = hour % 12 || 12;
+    return `${formattedHour}:${minutes} ${ampm}`;
+  };
+
+  const handleAppointmentPress = (appointment: WalkInAppointment) => {
+    setSelectedAppointment(appointment);
+    setModalVisible(true);
+  };
+
+  if (loading) {
+    return (
+      <View className="flex-1 justify-center items-center">
+        <ActivityIndicator size="large" color="#0066cc" />
+      </View>
+    );
+  }
+
+  return (
+    <>
+      <ScrollView className="flex-1 bg-gray-50 px-2 py-6">
+        <View className="mb-6 mt-8 flex-row justify-between items-center px-2">
+          <Text className="text-2xl font-bold text-gray-800">Walk-In Appointments</Text>
+          <TouchableOpacity 
+            onPress={() => fetchWalkInAppointments(1)}
+            className="bg-blue-500 px-3 py-2 rounded-lg flex-row items-center ml-2"
+          >
+            <Icon name="refresh" size={14} color="white" className="mr-1" />
+            <Text className="text-white font-medium text-sm">Refresh</Text>
+          </TouchableOpacity>
+        </View>
+
+        {walkInAppointments.length === 0 ? (
+          <View className="flex-1 justify-center items-center">
+            <Text className="text-lg text-gray-600">No walk-in appointments</Text>
+          </View>
+        ) : (
+          walkInAppointments.map((appointment) => (
+            <TouchableOpacity 
+              key={appointment.id} 
+              onPress={() => handleAppointmentPress(appointment)}
+            >
+              <View className="bg-white rounded-xl mb-4 shadow-sm border border-black">
+                <View className="flex-row justify-between items-center p-4 border-b border-gray-100">
+                  <Text className="text-base font-bold text-gray-800">
+                    {appointment.order_id}
+                  </Text>
+                  <View className="px-3 py-1 rounded-full border border-black bg-green-100">
+                    <Text className="text-xs capitalize text-green-800">
+                      {appointment.status}
+                    </Text>
+                  </View>
+                </View>
+
+                <View className="p-4">
+                  <View className="space-y-2">
+                    <View className="flex-row items-center">
+                      <Icon name="calendar" size={16} className="text-gray-500" />
+                      <Text className="ml-2 text-gray-600">
+                        {formatDate(appointment.delivery_date)} at {formatTime(appointment.delivery_time)}
+                      </Text>
+                    </View>
+                  </View>
+
+                  <View className="mt-4 pt-3 border-t border-gray-100">
+                    <Text className="text-right text-base font-bold text-gray-800">
+                      Total: ₹{appointment.gross_total}
+                    </Text>
+                    {/* <Text className="text-right text-sm text-gray-600">
+                      Commission: ₹{appointment.commission}
+                    </Text> */}
+                  </View>
+                </View>
+              </View>
+            </TouchableOpacity>
+          ))
+        )}
+
+        {currentPage < totalPages && (
+          <TouchableOpacity 
+            onPress={loadMore}
+            className="bg-blue-500 rounded px-4 py-2 mt-4 mb-14"
+            disabled={isLoadingMore}
+          >
+            <Text className="text-white text-center">
+              {isLoadingMore ? 'Loading...' : 'Load More'}
+            </Text>
+          </TouchableOpacity>
+        )}
+      </ScrollView>
+
+      <Modal
+        visible={modalVisible}
+        transparent={true}
+        animationType="slide"
+      >
+        <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
+          <View className="flex-1 justify-center items-center bg-black/50">
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+              <View className="bg-white rounded-lg p-4 w-11/12 relative">
+                {selectedAppointment && (
+                  <>
+                    <Text className="text-lg font-bold">{selectedAppointment.order_id}</Text>
+                    <Text>Date: {formatDate(selectedAppointment.delivery_date)}</Text>
+                    <Text>Time: {formatTime(selectedAppointment.delivery_time)}</Text>
+                    <Text>Status: {selectedAppointment.status}</Text>
+                    <Text>Total: ₹{selectedAppointment.gross_total}</Text>
+                  {/* <Text>Commission: ₹{selectedAppointment.commission}</Text> */}
+                    <Text>Payment Type: {selectedAppointment.payment_type === 1 ? 'Cash' : 'Online'}</Text>
+                    <Text>Balance Amount: ₹{selectedAppointment.balance_amount}</Text>
+                  </>
+                )}
+
+               {currentPage < totalPages && (
+                          <TouchableOpacity 
+                            onPress={loadMore}
+                            className="bg-blue-500 rounded px-4 py-2 mt-4 mb-14"
+                            disabled={isLoadingMore}
+                          >
+                            <Text className="text-white text-center">
+                              {isLoadingMore ? 'Loading...' : 'Load More'}
+                            </Text>
+                          </TouchableOpacity>
+                        )}
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+    </>
+  );
+}
+ 
