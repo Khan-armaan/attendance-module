@@ -98,6 +98,7 @@ interface WalkInAppointment {
 
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { Redirect } from "expo-router";
+import React from "react";
 
 
 const Tab = createMaterialTopTabNavigator();
