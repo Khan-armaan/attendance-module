@@ -8,6 +8,7 @@ import axios from 'axios';
 
 import { Link, router } from 'expo-router';
 import * as Location from 'expo-location';
+import React from "react";
 
 export default function MarkAttendance() {
 
@@ -30,38 +31,57 @@ export default function MarkAttendance() {
     
     const { userData } = useUser();  // to get the user information
 
-        async function getCurrentLocation() {
-            try {
+    // Add new state for last login
+    const [lastLoginTime, setLastLoginTime] = useState('');
+    const [lastLoginDate, setLastLoginDate] = useState('');
+
+    // Add useEffect to set last login time once on mount
+    useEffect(() => {
+        const now = new Date(Date.now());
+        setLastLoginTime(now.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+        }));
+        setLastLoginDate(now.toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric'
+        }));
+    }, []); // Empty dependency array means this runs once on mount
+
+    async function getCurrentLocation() {
+        try {
            
-              let { status } = await Location.requestForegroundPermissionsAsync();
+          let { status } = await Location.requestForegroundPermissionsAsync();
+      
           
-              
-              if (status !== 'granted') {
-                setErrorMsg('Permission to access location was denied');
-                return null;
-              }
-          
-           
-              let location = await Location.getCurrentPositionAsync({
-                accuracy: Location.Accuracy.High, // Changed to High accuracy
-                mayShowUserSettingsDialog: true
-              });
-              
-           
-              
-              if (location.coords.accuracy && location.coords.accuracy > 100) {
-                setErrorMsg('Location accuracy is too low. Please check your GPS settings.');
-                return null;
-              }
-              
-              setCoordinates(location);
-              return location;
-            } catch (error) {
-              console.error('Detailed location error:', error);
-              setErrorMsg('Error getting location: ' + error);
-              return null;
-            }
+          if (status !== 'granted') {
+            setErrorMsg('Permission to access location was denied');
+            return null;
           }
+      
+       
+          let location = await Location.getCurrentPositionAsync({
+            accuracy: Location.Accuracy.High, // Changed to High accuracy
+            mayShowUserSettingsDialog: true
+          });
+          
+       
+          
+          if (location.coords.accuracy && location.coords.accuracy > 100) {
+            setErrorMsg('Location accuracy is too low. Please check your GPS settings.');
+            return null;
+          }
+          
+          setCoordinates(location);
+          return location;
+        } catch (error) {
+          console.error('Detailed location error:', error);
+          setErrorMsg('Error getting location: ' + error);
+          return null;
+        }
+      }
 
 
 
@@ -318,7 +338,7 @@ export default function MarkAttendance() {
         try {
             const response = await axios.get(`https://api.feelaxo.com/api/staff/appointments?staff_id=${userData?.id}`);
             // Count appointments that are not cancelled and have future dates
-            const count = response.data.data.filter(appointment => {
+            const count = response.data.data.filter((appointment: { appointmentDate: string; appointmentTime: any; status: string; }) => {
                 const appointmentDate = new Date(`${appointment.appointmentDate.split('T')[0]} ${appointment.appointmentTime}`);
                 return appointment.status !== 'cancelled' && appointmentDate > new Date();
             }).length;
@@ -333,7 +353,7 @@ export default function MarkAttendance() {
         if (userData?.id) {
             fetchAppointments();
         }
-    }, [userData?.id]);
+    }, []);
 
     // Add this new function to fetch completed orders
     const fetchCompletedOrders = async () => {
@@ -345,12 +365,12 @@ export default function MarkAttendance() {
             let dailyCommission = 0;
             
             // Filter and calculate totals for completed POS appointments
-            const todayCompletedOrders = response.data.data.filter(appointment => {
+            const todayCompletedOrders = response.data.data.filter((appointment: { appointmentDate: string; status: string; }) => {
                 const appointmentDate = appointment.appointmentDate.split('T')[0];
                 return appointmentDate === today && appointment.status === 'completed';
             });
 
-            todayCompletedOrders.forEach(order => {
+            todayCompletedOrders.forEach((order: { grandTotal: string; commission: any; }) => {
                 dailySales += parseFloat(order.grandTotal);
                 dailyCommission += parseFloat(order.commission || 0);
             });
@@ -382,12 +402,12 @@ export default function MarkAttendance() {
             let dailyCommission = 0;
 
             // Filter and calculate totals for walk-in appointments
-            const todayWalkIns = response.data.data.filter(appointment => {
+            const todayWalkIns = response.data.data.filter((appointment: { delivery_date: string; status: string; }) => {
                 const appointmentDate = appointment.delivery_date.split('T')[0];
                 return appointmentDate === today && appointment.status === 'completed';
             });
 
-            todayWalkIns.forEach(order => {
+            todayWalkIns.forEach((order: { gross_total: string; commission: any; }) => {
                 dailySales += parseFloat(order.gross_total);
                 dailyCommission += parseFloat(order.commission || 0);
             });
@@ -415,7 +435,9 @@ export default function MarkAttendance() {
                 {/* Welcome Header */}
                 <View className="bg-white rounded-xl p-4 shadow-md">
                     <Text className="text-xl font-bold">Welcome {userData?.name}!</Text>
-                    <Text className="text-gray-600 text-sm">Last login: {currentTime} {currentDate}</Text>
+                    <Text className="text-gray-600 text-sm">
+                        Last login: {lastLoginTime} {lastLoginDate}
+                    </Text>
                 </View>
 
                 {/* Stats Grid */}
